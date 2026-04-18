@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Data.SqlClient;
 using RestoranRezervasyonSistemi.Views;
+using RestoranRezervasyonSistemi.Controllers;
 
 namespace RestoranRezervasyonSistemi
 {
     public partial class LoginForm : Form
     {
-        // Önemli: Portu düzelttiğin bağlantı cümlesini buraya aynen koydum.
-        string connectionString = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
+        private readonly LoginController _loginController = new LoginController();
 
         public LoginForm()
         {
@@ -19,48 +18,36 @@ namespace RestoranRezervasyonSistemi
         {
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                var identifier = !string.IsNullOrWhiteSpace(txtUser.Text)
+                    ? txtUser.Text.Trim()
+                    : txtFullName.Text?.Trim();
+
+                var currentUser = _loginController.CheckLogin(identifier, txtPass.Text);
+
+                if (currentUser == null)
                 {
-                    conn.Open();
-                    // Sorguyu güncelledik: Hem 'role' hem de 'email' bilgisini çekiyoruz
-                    string query = "SELECT role, email FROM users WHERE username=@user AND password=@pass";
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@user", txtUser.Text);
-                    cmd.Parameters.AddWithValue("@pass", txtPass.Text);
-
-                    using (SqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        if (dr.Read()) // Giriş başarılı
-                        {
-                            string userRole = dr["role"].ToString();
-                            string userEmail = dr["email"].ToString(); // Kullanıcının mailini aldık
-
-                            if (userRole == "Admin")
-                            {
-                                MessageBox.Show("Admin Paneline Hoş Geldiniz!");
-                                AdminPanel adminPanel = new AdminPanel();
-                                // Eğer AdminPanel'de de onay kodu kullanacaksan oraya da aktarabilirsin
-                                adminPanel.Show();
-                            }
-                            else
-                            {
-                                MessageBox.Show("Giriş Başarılı! Masa Planına Yönlendiriliyorsunuz.");
-                                MainForm main = new MainForm();
-
-                                // --- KRİTİK NOKTA: Mail adresini MainForm'a gönderiyoruz ---
-                                main.AktifKullaniciMail = userEmail;
-
-                                main.Show();
-                            }
-
-                            this.Hide(); // Login formunu gizle
-                        }
-                        else
-                        {
-                            MessageBox.Show("Kullanıcı adı veya şifre hatalı!");
-                        }
-                    }
+                    MessageBox.Show("Kullanıcı adı veya şifre hatalı!");
+                    return;
                 }
+
+                if (string.Equals(currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("Admin Paneline Hoş Geldiniz!");
+                    var adminPanel = new AdminPanel();
+                    adminPanel.Show();
+                }
+                else
+                {
+                    MessageBox.Show("Giriş Başarılı! Masa Planına Yönlendiriliyorsunuz.");
+                    var main = new MainForm
+                    {
+                        AktifKullaniciMail = currentUser.Email,
+                        CurrentUser = currentUser
+                    };
+                    main.Show();
+                }
+
+                Hide(); // Login formunu gizle
             }
             catch (Exception ex)
             {

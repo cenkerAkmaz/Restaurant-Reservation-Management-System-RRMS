@@ -87,9 +87,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\ReservationController.cs" />
     <Compile Include="Controllers\TableController.cs" />
     <Compile Include="Data\DbConnection.cs" />
+    <Compile Include="Data\ReservationRepository.cs" />
+    <Compile Include="Data\UserRepository.cs" />
     <Compile Include="ForgotPasswordForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,6 +107,7 @@
       <DependentUpon>IslemOnay.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Table.cs" />
+    <Compile Include="Models\Reservation.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
@@ -154,6 +159,7 @@
     <Compile Include="Views\AdminPanel.Designer.cs">
       <DependentUpon>AdminPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Services\SmtpEmailService.cs" />
     <EmbeddedResource Include="ForgotPasswordForm.resx">
       <DependentUpon>ForgotPasswordForm.cs</DependentUpon>
     </EmbeddedResource>

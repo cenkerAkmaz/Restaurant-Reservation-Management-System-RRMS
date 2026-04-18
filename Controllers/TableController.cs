@@ -1,65 +1,49 @@
-﻿using System.Data.SqlClient;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RestoranRezervasyonSistemi.Models;
+using RestoranRezervasyonSistemi.Data;
 using System;
 using System.Data;
-using System.Configuration;
+using System.Data.SqlClient;
 
 namespace RestoranRezervasyonSistemi.Controllers
 {
     public class TableController
     {
-        DbConnection db = new DbConnection();
+        private readonly DbConnection _db = new DbConnection();
 
         public List<Table> GetAllTables()
         {
-            List<Table> tables = new List<Table>();
-            try
+            var tables = new List<Table>();
+
+            using (var conn = _db.GetConnection())
             {
-                using (var conn = db.GetConnection())
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                // NOTE: Some DBs use MasaDurumlari as a view; keep as-is to avoid breaking existing DB.
+                const string sql = "SELECT id, table_name, capacity, location, Status, reservation_time FROM MasaDurumlari";
+
+                using (var cmd = new SqlCommand(sql, conn))
+                using (var dr = cmd.ExecuteReader())
                 {
-                    if (conn.State == ConnectionState.Closed) conn.Open();
-
-                    // Sadece temel bilgileri çekiyoruz (Hata riskini azaltmak için)
-                    string sql = "SELECT id, table_name, capacity, location, Status, reservation_time FROM MasaDurumlari";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-
-                    using (var dr = cmd.ExecuteReader())
+                    while (dr.Read())
                     {
-                        while (dr.Read())
+                        var table = new Table
                         {
-                            try
-                            {
-                                Table masa = new Table();
-                                masa.Id = dr["id"] != DBNull.Value ? Convert.ToInt32(dr["id"]) : 0;
-                                masa.TableName = dr["table_name"]?.ToString() ?? "İsimsiz";
-                                masa.Capacity = dr["capacity"] != DBNull.Value ? Convert.ToInt32(dr["capacity"]) : 0;
-                                masa.Location = dr["location"]?.ToString() ?? "";
-                                // GetAllTables içindeki o satırı tam olarak böyle yap:
-                                masa.Status = dr["status"] != DBNull.Value ? dr["status"].ToString().Trim() : "Bos";
+                            Id = dr["id"] != DBNull.Value ? Convert.ToInt32(dr["id"]) : 0,
+                            TableName = dr["table_name"]?.ToString() ?? "İsimsiz",
+                            Capacity = dr["capacity"] != DBNull.Value ? Convert.ToInt32(dr["capacity"]) : 0,
+                            Location = dr["location"]?.ToString() ?? "",
+                            Status = dr["status"] != DBNull.Value ? dr["status"].ToString().Trim() : "Bos",
+                        };
 
-                                // Saat okuma kısmını en güvenli hale getirdik
-                                if (dr["reservation_time"] != DBNull.Value)
-                                {
-                                    masa.ReservationTime = (TimeSpan)dr["reservation_time"];
-                                }
+                        if (dr["reservation_time"] != DBNull.Value)
+                            table.ReservationTime = (TimeSpan)dr["reservation_time"];
 
-                                tables.Add(masa);
-                            }
-                            catch (Exception exInner)
-                            {
-                                // Tek bir masada hata varsa onu atla ama diğerlerini getir
-                                continue;
-                            }
-                        }
+                        tables.Add(table);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                // EĞER HALA MASALAR GELMEZSE BURASI SANA NEDENİNİ SÖYLEYECEK:
-                System.Windows.Forms.MessageBox.Show("Veritabanı Hatası: " + ex.Message);
-            }
+
             return tables;
         }
 
@@ -67,16 +51,18 @@ namespace RestoranRezervasyonSistemi.Controllers
         {
             try
             {
-                using (var conn = db.GetConnection())
+                using (var conn = _db.GetConnection())
                 {
                     if (conn.State == ConnectionState.Closed) conn.Open();
                     string sql = "INSERT INTO tables (table_name, capacity, location, status) VALUES (@name, @cap, @loc, @status)";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@name", t.TableName);
-                    cmd.Parameters.AddWithValue("@cap", t.Capacity);
-                    cmd.Parameters.AddWithValue("@loc", t.Location);
-                    cmd.Parameters.AddWithValue("@status", string.IsNullOrEmpty(t.Status) ? "Bos" : t.Status);
-                    return cmd.ExecuteNonQuery() > 0;
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@name", t.TableName);
+                        cmd.Parameters.AddWithValue("@cap", t.Capacity);
+                        cmd.Parameters.AddWithValue("@loc", t.Location);
+                        cmd.Parameters.AddWithValue("@status", string.IsNullOrEmpty(t.Status) ? "Bos" : t.Status);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
                 }
             }
             catch (Exception) { return false; }
@@ -86,13 +72,15 @@ namespace RestoranRezervasyonSistemi.Controllers
         {
             try
             {
-                using (var conn = db.GetConnection())
+                using (var conn = _db.GetConnection())
                 {
                     if (conn.State == ConnectionState.Closed) conn.Open();
                     string sql = "DELETE FROM tables WHERE id = @id";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    return cmd.ExecuteNonQuery() > 0;
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
                 }
             }
             catch (Exception) { return false; }
@@ -102,17 +90,19 @@ namespace RestoranRezervasyonSistemi.Controllers
         {
             try
             {
-                using (var conn = db.GetConnection())
+                using (var conn = _db.GetConnection())
                 {
                     if (conn.State == ConnectionState.Closed) conn.Open();
                     string sql = "UPDATE tables SET table_name=@name, capacity=@cap, location=@loc, status=@status WHERE id=@id";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@name", t.TableName);
-                    cmd.Parameters.AddWithValue("@cap", t.Capacity);
-                    cmd.Parameters.AddWithValue("@loc", t.Location);
-                    cmd.Parameters.AddWithValue("@status", t.Status);
-                    cmd.Parameters.AddWithValue("@id", t.Id);
-                    return cmd.ExecuteNonQuery() > 0;
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@name", t.TableName);
+                        cmd.Parameters.AddWithValue("@cap", t.Capacity);
+                        cmd.Parameters.AddWithValue("@loc", t.Location);
+                        cmd.Parameters.AddWithValue("@status", t.Status);
+                        cmd.Parameters.AddWithValue("@id", t.Id);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
                 }
             }
             catch (Exception) { return false; }

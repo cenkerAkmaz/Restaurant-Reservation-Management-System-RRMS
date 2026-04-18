@@ -36,6 +36,7 @@
             this.lblTarih = new System.Windows.Forms.Label();
             this.dtpTarih = new System.Windows.Forms.DateTimePicker();
             this.btnOnayla = new System.Windows.Forms.Button();
+            this.btnIptalEt = new System.Windows.Forms.Button();
             this.btnVazgec = new System.Windows.Forms.Button();
             this.nmrKisiSayisi = new System.Windows.Forms.NumericUpDown();
             this.lblSaat = new System.Windows.Forms.Label();
@@ -116,15 +117,27 @@
             this.btnOnayla.UseVisualStyleBackColor = false;
             this.btnOnayla.Click += new System.EventHandler(this.btnOnayla_Click);
             // 
+            // btnIptalEt
+            // 
+            this.btnIptalEt.BackColor = System.Drawing.Color.Firebrick;
+            this.btnIptalEt.ForeColor = System.Drawing.Color.White;
+            this.btnIptalEt.Location = new System.Drawing.Point(50, 409);
+            this.btnIptalEt.Name = "btnIptalEt";
+            this.btnIptalEt.Size = new System.Drawing.Size(280, 32);
+            this.btnIptalEt.TabIndex = 8;
+            this.btnIptalEt.Text = "Rezervasyonu İptal Et";
+            this.btnIptalEt.UseVisualStyleBackColor = false;
+            this.btnIptalEt.Click += new System.EventHandler(this.btnIptalEt_Click);
+            // 
             // btnVazgec
             // 
-            this.btnVazgec.BackColor = System.Drawing.Color.IndianRed;
-            this.btnVazgec.ForeColor = System.Drawing.Color.Black;
-            this.btnVazgec.Location = new System.Drawing.Point(50, 409);
+            this.btnVazgec.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(140)))), ((int)(((byte)(141)))));
+            this.btnVazgec.ForeColor = System.Drawing.Color.White;
+            this.btnVazgec.Location = new System.Drawing.Point(50, 447);
             this.btnVazgec.Name = "btnVazgec";
             this.btnVazgec.Size = new System.Drawing.Size(280, 32);
-            this.btnVazgec.TabIndex = 8;
-            this.btnVazgec.Text = "İptal";
+            this.btnVazgec.TabIndex = 9;
+            this.btnVazgec.Text = "Kapat";
             this.btnVazgec.UseVisualStyleBackColor = false;
             this.btnVazgec.Click += new System.EventHandler(this.btnVazgec_Click);
             // 
@@ -174,11 +187,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(370, 453);
+            this.ClientSize = new System.Drawing.Size(370, 493);
             this.Controls.Add(this.dtpSaat);
             this.Controls.Add(this.lblSaat);
             this.Controls.Add(this.nmrKisiSayisi);
             this.Controls.Add(this.btnVazgec);
+            this.Controls.Add(this.btnIptalEt);
             this.Controls.Add(this.btnOnayla);
             this.Controls.Add(this.dtpTarih);
             this.Controls.Add(this.lblTarih);
@@ -207,6 +221,7 @@
         private System.Windows.Forms.Label lblTarih;
         private System.Windows.Forms.DateTimePicker dtpTarih;
         private System.Windows.Forms.Button btnOnayla;
+        private System.Windows.Forms.Button btnIptalEt;
         private System.Windows.Forms.Button btnVazgec;
         private System.Windows.Forms.NumericUpDown nmrKisiSayisi;
         private System.Windows.Forms.Label lblSaat;

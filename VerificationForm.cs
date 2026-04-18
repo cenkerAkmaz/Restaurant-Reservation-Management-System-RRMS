@@ -1,6 +1,6 @@
-﻿using System.Data.SqlClient;
-using System;
+﻿using System;
 using System.Windows.Forms;
+using RestoranRezervasyonSistemi.Controllers;
 
 namespace RestoranRezervasyonSistemi
 {
@@ -9,14 +9,15 @@ namespace RestoranRezervasyonSistemi
         // Dışarıdan gelen veriler
         public string GelenMail { get; set; }
         public string GelenKullaniciAdi { get; set; }
+        public string GelenAdSoyad { get; set; }
         public string GelenSifre { get; set; }
+        public string GelenTelefon { get; set; }
         public string GelenKod { get; set; }
 
         // Bu değişken Kayıt mı (False) yoksa Şifre Sıfırlama mı (True) olduğunu belirler
         public bool IsPasswordReset { get; set; } = false;
 
-        // Senin çalışan bağlantı adresini buraya ekledim
-        string connectionString = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
+        private readonly AccountController _accountController = new AccountController();
 
         public VerificationForm()
         {
@@ -34,31 +35,25 @@ namespace RestoranRezervasyonSistemi
                     if (IsPasswordReset)
                     {
                         MessageBox.Show("Kod Doğrulandı! Lütfen yeni şifrenizi belirleyin.");
-                        ResetPasswordForm rpf = new ResetPasswordForm();
-                        rpf.UserMail = GelenMail;
+                        ResetPasswordForm rpf = new ResetPasswordForm
+                        {
+                            UserMail = GelenMail
+                        };
                         rpf.Show();
                         this.Hide();
                     }
                     // DURUM 2: YENİ KAYIT (REGISTER)
                     else
                     {
-                        // Kod doğru, şimdi kullanıcıyı veritabanına ASIL kaydetme vakti!
-                        using (SqlConnection conn = new SqlConnection(connectionString))
-                        {
-                            conn.Open();
-                            string saveQuery = "INSERT INTO users (username, password, email) VALUES (@user, @pass, @mail)";
-                            SqlCommand saveCmd = new SqlCommand(saveQuery, conn);
-                            saveCmd.Parameters.AddWithValue("@user", GelenKullaniciAdi);
-                            saveCmd.Parameters.AddWithValue("@pass", GelenSifre);
-                            saveCmd.Parameters.AddWithValue("@mail", GelenMail);
-                            saveCmd.ExecuteNonQuery();
-                        }
+                        // Kod doğru, kullanıcıyı DB'ye kaydet
+                        _accountController.CompleteRegistration(GelenKullaniciAdi, GelenSifre, GelenMail, GelenAdSoyad, GelenTelefon);
 
-                        MessageBox.Show("Kayıt Başarılı! Hoş geldiniz, " + GelenKullaniciAdi + "!");
-                        MainForm anaMenu = new MainForm();
-                        anaMenu.AktifKullaniciMail = GelenMail;
-                        anaMenu.Show();
-                        this.Hide();
+                        MessageBox.Show("Kayıt Başarılı! Artık giriş yapabilirsiniz.", "Bilgi");
+
+                        // Güvenlik/akış: doğrulamadan sonra doğrudan giriş ekranına dön.
+                        var login = new LoginForm();
+                        login.Show();
+                        Close();
                     }
                 }
                 else

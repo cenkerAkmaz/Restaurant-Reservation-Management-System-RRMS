@@ -9,7 +9,17 @@ namespace RestoranRezervasyonSistemi
     public partial class MainForm : Form
     {
         public string AktifKullaniciMail { get; set; }
-        TableController tableController = new TableController();
+        public User CurrentUser { get; set; }
+
+        private readonly TableController _tableController = new TableController();
+        private readonly ReservationController _reservationController = new ReservationController();
+        private readonly ToolTip _toolTip = new ToolTip
+        {
+            AutoPopDelay = 8000,
+            InitialDelay = 400,
+            ReshowDelay = 200,
+            ShowAlways = true
+        };
 
         public MainForm()
         {
@@ -26,7 +36,7 @@ namespace RestoranRezervasyonSistemi
             
             flpMasalar.Controls.Clear();
 
-            var masalar = tableController.GetAllTables();
+            var masalar = _tableController.GetAllTables();
 
             foreach (var masa in masalar)
             {
@@ -45,7 +55,7 @@ namespace RestoranRezervasyonSistemi
 
                     // Rezervasyona 30 dakika kala kırmızı yap (Bilgisayar saati bazlı)
                     if (suAnkiSaat >= rezSaati.Add(TimeSpan.FromMinutes(-30)) &&
-                        suAnkiSaat <= rezSaati.Add(TimeSpan.FromHours(2)))
+                        suAnkiSaat <= rezSaati.Add(TimeSpan.FromMinutes(150)))
                     {
                         btn.BackColor = Color.Firebrick; // KIRMIZI
                     }
@@ -66,21 +76,21 @@ namespace RestoranRezervasyonSistemi
                 btn.FlatStyle = FlatStyle.Flat;
                 btn.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
-                
-                ToolTip tt = new ToolTip();
-                tt.AutoPopDelay = 5000;
-                tt.InitialDelay = 500;
-                tt.ReshowDelay = 200;
-                tt.ShowAlways = true;
+                // Hover bilgisi: sonraki rezervasyon + en erken uygun saat (2.5 saat kuralıyla)
+                var today = DateTime.Today;
+                var now = DateTime.Now.TimeOfDay;
+                var next = _reservationController.GetNextReservationTime(masa.Id, today, now);
+                var earliest = _reservationController.GetEarliestAvailableTime(masa.Id, today, now);
 
-                if (durum == "Dolu")
-                {
-                    tt.SetToolTip(btn, $"{masa.TableName} REZERVE\nDurum: Şu an kullanımda.");
-                }
-                else
-                {
-                    tt.SetToolTip(btn, $"{masa.TableName} MÜSAİT\nKapasite: {masa.Capacity} Kişi\nKonum: {masa.Location}");
-                }
+                var nextText = next.HasValue ? next.Value.ToString(@"hh\:mm") : "Yok";
+                var earliestText = earliest.ToString(@"hh\:mm");
+
+                var tooltip = $"{masa.TableName}\nKonum: {masa.Location}\nKapasite: {masa.Capacity}\n" +
+                              $"Sonraki rezervasyon: {nextText}\n" +
+                              $"En erken uygun saat: {earliestText}\n" +
+                              $"Oturma süresi: 2.5 saat";
+
+                _toolTip.SetToolTip(btn, tooltip);
 
                 
                 btn.Click += (s, ev) => {
@@ -88,6 +98,7 @@ namespace RestoranRezervasyonSistemi
                     detay.SecilenMasaAd = masa.TableName;
                     detay.SecilenMasaId = masa.Id;
                     detay.GirisYapanAdminMail = this.AktifKullaniciMail;
+                    detay.AktifKullanici = this.CurrentUser;
                     detay.SecilenMasaKapasite = masa.Capacity;
 
                     detay.ShowDialog(); // Formu açar ve kapanana kadar bekler

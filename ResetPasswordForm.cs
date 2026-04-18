@@ -8,12 +8,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RestoranRezervasyonSistemi.Controllers;
 
 namespace RestoranRezervasyonSistemi
 {
     public partial class ResetPasswordForm : Form
     {
         public string UserMail { get; set; }
+        private readonly AccountController _accountController = new AccountController();
+
         public ResetPasswordForm()
         {
             InitializeComponent();
@@ -41,30 +44,14 @@ namespace RestoranRezervasyonSistemi
             // 3. Veritabanında Güncelle
             try
             {
-                // 
-                string connectionString = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    if (conn.State == ConnectionState.Open) conn.Close(); // Varsa açık olanı kapat
-                    conn.Open();
-                    string updateQuery = "UPDATE users SET password = @newpass WHERE email = @mail";
-                    SqlCommand cmd = new SqlCommand(updateQuery, conn);
+                _accountController.UpdatePassword(UserMail, pass1);
 
-                    cmd.Parameters.AddWithValue("@newpass", pass1); // Yeni şifre
-                    cmd.Parameters.AddWithValue("@mail", UserMail); // VerificationForm'dan gelen mail
+                MessageBox.Show("Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.");
 
-                    int rowsAffected = cmd.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        MessageBox.Show("Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.");
-
-                        // Kullanıcıyı tekrar login ekranına gönderiyoruz
-                        LoginForm login = new LoginForm();
-                        login.Show();
-                        this.Close();
-                    }
-                }
+                // Kullanıcıyı tekrar login ekranına gönderiyoruz
+                LoginForm login = new LoginForm();
+                login.Show();
+                Close();
             }
             catch (Exception ex)
             {

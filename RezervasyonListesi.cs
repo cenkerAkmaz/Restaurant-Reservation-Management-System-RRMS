@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Windows.Forms;
+using RestoranRezervasyonSistemi.Controllers;
 
 namespace RestoranRezervasyonSistemi
 {
     public partial class RezervasyonListesi : Form
     {
+        private readonly ReservationController _reservationController = new ReservationController();
+        public Models.User CurrentUser { get; set; }
+
         public RezervasyonListesi()
         {
             InitializeComponent();
@@ -20,43 +22,12 @@ namespace RestoranRezervasyonSistemi
 
         public void Listele()
         {
-            string cs = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
             try
             {
-                using (SqlConnection conn = new SqlConnection(cs))
-                {
-                    string sql = @"SELECT r.id, t.table_name as [Masa], r.customer_name as [Müşteri], 
-                                   r.reservation_date as [Tarih], r.reservation_time as [Saat] 
-                                   FROM reservations r 
-                                   JOIN tables t ON r.table_id = t.id 
-                                   ORDER BY r.reservation_date, r.reservation_time";
-                    SqlDataAdapter da = new SqlDataAdapter(sql, conn);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvRezervasyonlar.DataSource = dt;
-                }
+                DataTable dt = _reservationController.GetReservationList();
+                dgvRezervasyonlar.DataSource = dt;
             }
             catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
-        }
-
-        // Detay formundan çağrılan Yetki Kontrollü Silme Motoru
-        public bool RezervasyonIptalEt(int masaId, string silecekKullaniciMail)
-        {
-            string cs = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(cs))
-                {
-                    conn.Open();
-                    // Sadece masa ID ve mail uyuşuyorsa siler
-                    string sql = "DELETE FROM reservations WHERE table_id = @masaId AND customer_email = @mail AND reservation_date = CAST(GETDATE() AS DATE)";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@masaId", masaId);
-                    cmd.Parameters.AddWithValue("@mail", silecekKullaniciMail);
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-            catch { return false; }
         }
 
         private void btnKapat_Click(object sender, EventArgs e)
@@ -76,20 +47,29 @@ namespace RestoranRezervasyonSistemi
 
                 if (onay == DialogResult.Yes)
                 {
-                    string cs = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
-                    using (SqlConnection conn = new SqlConnection(cs))
+                    try
                     {
-                        conn.Open();
-                        // Listeden sildiğimiz için direkt rezervasyonun kendi ID'si üzerinden siliyoruz
-                        string sql = "DELETE FROM reservations WHERE id = @id";
-                        SqlCommand cmd = new SqlCommand(sql, conn);
-                        cmd.Parameters.AddWithValue("@id", seciliRezervasyonId);
+                        if (CurrentUser == null || string.IsNullOrWhiteSpace(CurrentUser.Email))
+                        {
+                            MessageBox.Show("Aktif kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
+                            return;
+                        }
 
-                        if (cmd.ExecuteNonQuery() > 0)
+                        var name = string.IsNullOrWhiteSpace(CurrentUser.FullName) ? CurrentUser.Username : CurrentUser.FullName;
+
+                        if (_reservationController.CancelByIdForUser(seciliRezervasyonId, CurrentUser.Email, name))
                         {
                             MessageBox.Show("Rezervasyon başarıyla silindi.");
                             Listele(); // Listeyi yenile
                         }
+                        else
+                        {
+                            MessageBox.Show("Başkalarının rezervasyonunu iptal edemezsiniz!", "Yetki Yok", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Silme sırasında hata: " + ex.Message);
                     }
                 }
             }

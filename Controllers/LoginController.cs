@@ -1,34 +1,42 @@
-﻿using System.Data.SqlClient;
-using RestoranRezervasyonSistemi.Models;
-using System.Data;
+﻿using RestoranRezervasyonSistemi.Models;
+using RestoranRezervasyonSistemi.Data;
+using System;
 using System.Data.SqlClient;
-using System.Configuration;
 
 namespace RestoranRezervasyonSistemi.Controllers
 {
     public class LoginController
     {
-        DbConnection db = new DbConnection();
+        private readonly DbConnection _db = new DbConnection();
 
-        public User CheckLogin(string user, string pass)
+        public User CheckLogin(string userOrFullName, string pass)
         {
-            using (var conn = db.GetConnection())
+            if (string.IsNullOrWhiteSpace(userOrFullName) || string.IsNullOrWhiteSpace(pass))
+                return null;
+
+            using (var conn = _db.GetConnection())
             {
                 conn.Open();
-                string sql = "SELECT * FROM users WHERE username=@u AND password=@p";
-                SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@u", user);
-                cmd.Parameters.AddWithValue("@p", pass);
+                const string sql = "SELECT username, role, email, full_name, phone FROM users WHERE (username=@u OR full_name=@u) AND password=@p";
 
-                using (var dr = cmd.ExecuteReader())
+                using (var cmd = new SqlCommand(sql, conn))
                 {
-                    if (dr.Read())
+                    cmd.Parameters.AddWithValue("@u", userOrFullName);
+                    cmd.Parameters.AddWithValue("@p", pass);
+
+                    using (var dr = cmd.ExecuteReader())
                     {
-                        return new User
+                        if (dr.Read())
                         {
-                            Username = dr["username"].ToString(),
-                            Role = dr["role"].ToString()
-                        };
+                            return new User
+                            {
+                                Username = dr["username"]?.ToString(),
+                                Role = dr["role"]?.ToString(),
+                                Email = dr["email"]?.ToString(),
+                                FullName = dr["full_name"]?.ToString(),
+                                Phone = dr["phone"]?.ToString()
+                            };
+                        }
                     }
                 }
             }

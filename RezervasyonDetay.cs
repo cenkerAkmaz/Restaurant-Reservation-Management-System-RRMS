@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Mail;
 using System.Net;
+using RestoranRezervasyonSistemi.Controllers;
+using RestoranRezervasyonSistemi.Services;
+using RestoranRezervasyonSistemi.Models;
 
 namespace RestoranRezervasyonSistemi
 {
@@ -18,10 +20,14 @@ namespace RestoranRezervasyonSistemi
         public string SecilenMasaAd { get; set; }
         public int SecilenMasaId { get; set; }
         public string GirisYapanAdminMail { get; set; }
+        public User AktifKullanici { get; set; }
         public int SecilenMasaKapasite { get; set; }
         string dogrulamaKodu;
 
         // 6. hafta kodları eklendi
+        private readonly ReservationController _reservationController = new ReservationController();
+        private readonly SmtpEmailService _emailService = new SmtpEmailService();
+        private int? _currentUserReservationId;
 
         public RezervasyonDetay()
         {
@@ -31,6 +37,64 @@ namespace RestoranRezervasyonSistemi
         private void RezervasyonDetay_Load(object sender, EventArgs e)
         {
             lblBilgi.Text = SecilenMasaAd + " Rezervasyon İşlemi";
+
+            // Login sonrası müşteri ad/soyad ve telefon otomatik gelsin.
+            // DB'de full_name yoksa Username ile devam eder.
+            if (AktifKullanici != null)
+            {
+                var displayName = string.IsNullOrWhiteSpace(AktifKullanici.FullName)
+                    ? AktifKullanici.Username
+                    : AktifKullanici.FullName;
+
+                if (!string.IsNullOrWhiteSpace(displayName))
+                    txtMusteriAd.Text = displayName;
+
+                if (!string.IsNullOrWhiteSpace(AktifKullanici.Phone))
+                    txtMusteriTel.Text = AktifKullanici.Phone;
+            }
+
+            // İptal butonu yalnızca iptal edilecek rezervasyon varsa aktif olsun.
+            btnIptalEt.Enabled = false;
+            dtpTarih.ValueChanged += (s, ev) => UpdateCancelButtonState();
+            dtpSaat.ValueChanged += (s, ev) => UpdateCancelButtonState();
+            UpdateCancelButtonState();
+        }
+
+        private void UpdateCancelButtonState()
+        {
+            try
+            {
+                _currentUserReservationId = null;
+
+                var customerName = txtMusteriAd.Text?.Trim();
+                var customerEmail = GirisYapanAdminMail;
+
+                if (string.IsNullOrWhiteSpace(customerName) || string.IsNullOrWhiteSpace(customerEmail))
+                {
+                    btnIptalEt.Enabled = false;
+                    return;
+                }
+
+                var r = _reservationController.GetNextReservationForUser(SecilenMasaId, dtpTarih.Value.Date, customerEmail, customerName);
+                if (r == null)
+                {
+                    btnIptalEt.Enabled = false;
+                    return;
+                }
+
+                _currentUserReservationId = r.Value.ReservationId;
+                btnIptalEt.Enabled = true;
+
+                // Kullanıcının rezervasyon saatini otomatik seçili yap (iptal kolay olsun).
+                var desired = DateTime.Today.Add(r.Value.ReservationTime);
+                if (dtpSaat.Value.TimeOfDay != r.Value.ReservationTime)
+                    dtpSaat.Value = desired;
+            }
+            catch
+            {
+                btnIptalEt.Enabled = false;
+                _currentUserReservationId = null;
+            }
         }
 
         private void btnOnayla_Click(object sender, EventArgs e)
@@ -54,19 +118,10 @@ namespace RestoranRezervasyonSistemi
 
             try
             {
-                MailMessage mail = new MailMessage();
-                SmtpClient sc = new SmtpClient("smtp.gmail.com", 587);
-                sc.Credentials = new NetworkCredential("merttemizcanbir@gmail.com", "wwidqtllkzghrnio");
-                sc.EnableSsl = true;
-                mail.From = new MailAddress("merttemizcanbir@gmail.com");
-                mail.To.Add(GirisYapanAdminMail);
-                mail.Subject = "Rezervasyon İşlem Onayı";
-                mail.Body = $"Onay kodunuz: {dogrulamaKodu}";
-
-                sc.Send(mail);
+                _emailService.Send(GirisYapanAdminMail, "Rezervasyon İşlem Onayı", $"Onay kodunuz: {dogrulamaKodu}");
                 MessageBox.Show($"Güvenlik kodu {GirisYapanAdminMail} adresine gönderildi.", "Onay Gerekli");
 
-                IslemOnay onayEkrani = new IslemOnay();
+                var onayEkrani = new RestoranRezervasyonSistemi.Views.IslemOnay();
                 onayEkrani.GonderilenKod = dogrulamaKodu;
 
                 if (onayEkrani.ShowDialog() == DialogResult.OK)
@@ -79,43 +134,27 @@ namespace RestoranRezervasyonSistemi
 
         private void AsilKaydiYap()
         {
-            string connectionString = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string sql = "INSERT INTO reservations (table_id, customer_name, customer_phone, reservation_date, guest_count, reservation_time, customer_email) " +
-                                 "VALUES (@tid, @name, @phone, @date, @count, @time, @mail)";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@tid", SecilenMasaId);
-                    cmd.Parameters.AddWithValue("@name", txtMusteriAd.Text);
-                    cmd.Parameters.AddWithValue("@phone", txtMusteriTel.Text);
-                    cmd.Parameters.AddWithValue("@date", dtpTarih.Value.Date);
-                    cmd.Parameters.AddWithValue("@count", (int)nmrKisiSayisi.Value);
-                    cmd.Parameters.AddWithValue("@time", dtpSaat.Value.TimeOfDay);
-                    cmd.Parameters.AddWithValue("@mail", GirisYapanAdminMail);
-                    cmd.ExecuteNonQuery();
-                    MessageBox.Show("Başarıyla rezerve edildi!");
-                    this.Close();
-                }
+                _reservationController.CreateReservation(
+                    tableId: SecilenMasaId,
+                    customerName: txtMusteriAd.Text,
+                    customerPhone: txtMusteriTel.Text,
+                    date: dtpTarih.Value.Date,
+                    time: dtpSaat.Value.TimeOfDay,
+                    guestCount: (int)nmrKisiSayisi.Value,
+                    customerEmail: GirisYapanAdminMail
+                );
+
+                MessageBox.Show("Başarıyla rezerve edildi!");
+                Close();
             }
             catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
         }
 
         private bool CakismaVarMi(int masaId, DateTime tarih, TimeSpan saat)
         {
-            string connectionString = @"Data Source=127.0.0.1,1433;Initial Catalog=rrms_db;Integrated Security=True;TrustServerCertificate=True";
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                string sql = "SELECT COUNT(*) FROM reservations WHERE table_id = @tid AND reservation_date = @date AND ABS(DATEDIFF(minute, reservation_time, @time)) < 120";
-                SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.AddWithValue("@tid", masaId);
-                cmd.Parameters.AddWithValue("@date", tarih.Date);
-                cmd.Parameters.AddWithValue("@time", saat);
-                return (int)cmd.ExecuteScalar() > 0;
-            }
+            return _reservationController.HasConflict(masaId, tarih.Date, saat);
         }
 
         
@@ -125,9 +164,26 @@ namespace RestoranRezervasyonSistemi
             DialogResult onay = MessageBox.Show("Rezervasyonunuzu iptal etmek istiyor musunuz?", "Onay", MessageBoxButtons.YesNo);
             if (onay == DialogResult.Yes)
             {
-                RezervasyonListesi listeMotoru = new RezervasyonListesi();
-                // Bilgileri parametre olarak gönderiyoruz 
-                bool sonuc = listeMotoru.RezervasyonIptalEt(this.SecilenMasaId, this.GirisYapanAdminMail);
+                var customerName = txtMusteriAd.Text?.Trim();
+                var customerEmail = GirisYapanAdminMail;
+
+                bool sonuc = false;
+
+                if (_currentUserReservationId.HasValue)
+                {
+                    sonuc = _reservationController.CancelByIdForUser(_currentUserReservationId.Value, customerEmail, customerName);
+                }
+                else
+                {
+                    // Fallback: try by table/date/time
+                    sonuc = _reservationController.CancelForUser(
+                        tableId: SecilenMasaId,
+                        date: dtpTarih.Value.Date,
+                        time: dtpSaat.Value.TimeOfDay,
+                        customerEmail: customerEmail,
+                        customerName: customerName
+                    );
+                }
 
                 if (sonuc)
                 {
@@ -136,16 +192,29 @@ namespace RestoranRezervasyonSistemi
                 }
                 else
                 {
-                    MessageBox.Show("Sadece kendi rezervasyonunuzu iptal edebilirsiniz!", "Yetki Yok", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // Eğer aynı masa/tarih/saat için rezervasyon varsa ama senin ad+mail eşleşmiyorsa -> yetki yok
+                    // Hiç rezervasyon yoksa -> daha doğru mesaj
+                    var anyReservationExists = _reservationController.ReservationExists(
+                        tableId: SecilenMasaId,
+                        date: dtpTarih.Value.Date,
+                        time: dtpSaat.Value.TimeOfDay
+                    );
+
+                    if (anyReservationExists)
+                    {
+                        MessageBox.Show("Başkalarının rezervasyonunu iptal edemezsiniz!", "Yetki Yok", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Bu tarih/saat için iptal edilecek rezervasyon bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
             }
         }
 
         private void btnVazgec_Click(object sender, EventArgs e)
         {
-            this.Close();
-            RezervasyonListesi liste = new RezervasyonListesi();
-            liste.ShowDialog();
+            Close();
         }
     }
 }
