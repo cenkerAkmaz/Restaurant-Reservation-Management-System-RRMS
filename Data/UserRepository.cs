@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using RestoranRezervasyonSistemi.Models;
 
 namespace RestoranRezervasyonSistemi.Data
 {
@@ -38,21 +40,7 @@ namespace RestoranRezervasyonSistemi.Data
 
         public void InsertUser(string username, string password, string email)
         {
-            using (var conn = _db.GetConnection())
-            {
-                conn.Open();
-                const string sql = "INSERT INTO users (username, password, email, full_name, phone) VALUES (@user, @pass, @mail, @fullName, @phone)";
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user", username);
-                    cmd.Parameters.AddWithValue("@pass", password);
-                    cmd.Parameters.AddWithValue("@mail", email);
-                    // If full name isn't collected explicitly, default to username to keep UI working.
-                    cmd.Parameters.AddWithValue("@fullName", username);
-                    cmd.Parameters.AddWithValue("@phone", DBNull.Value);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            InsertUser(username, password, email, username, null);
         }
 
         public void InsertUser(string username, string password, string email, string fullName, string phone)
@@ -84,6 +72,71 @@ namespace RestoranRezervasyonSistemi.Data
                     cmd.Parameters.AddWithValue("@newpass", newPassword);
                     cmd.Parameters.AddWithValue("@mail", email);
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public List<User> GetAllUsers()
+        {
+            var users = new List<User>();
+            
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                const string sql = "SELECT id, username, email, full_name, phone, role, IsBanned FROM users ORDER BY full_name";
+                
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            users.Add(new User
+                            {
+                                Id = Convert.ToInt32(dr["id"]),
+                                Username = dr["username"]?.ToString(),
+                                Email = dr["email"]?.ToString(),
+                                FullName = dr["full_name"]?.ToString(),
+                                Phone = dr["phone"]?.ToString(),
+                                Role = dr["role"]?.ToString(),
+                                IsBanned = Convert.ToBoolean(dr["IsBanned"])
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return users;
+        }
+
+        public bool BanUser(int userId)
+        {
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                const string sql = "UPDATE users SET IsBanned = 1 WHERE id = @userId";
+                
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    int affected = cmd.ExecuteNonQuery();
+                    return affected > 0;
+                }
+            }
+        }
+
+        public bool UnbanUser(int userId)
+        {
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                const string sql = "UPDATE users SET IsBanned = 0 WHERE id = @userId";
+                
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    int affected = cmd.ExecuteNonQuery();
+                    return affected > 0;
                 }
             }
         }

@@ -1,6 +1,7 @@
 using RestoranRezervasyonSistemi.Data;
 using RestoranRezervasyonSistemi.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace RestoranRezervasyonSistemi.Controllers
@@ -26,6 +27,11 @@ namespace RestoranRezervasyonSistemi.Controllers
         {
             // Business rule: each reservation occupies the table for 2.5 hours (150 minutes).
             return _reservations.HasConflict(tableId, date, time, conflictWindowMinutes: 150);
+        }
+
+        public List<Reservation> GetAllReservations()
+        {
+            return _reservations.GetAllReservations();
         }
 
         public void CreateReservation(int tableId, string customerName, string customerPhone, DateTime date, TimeSpan time, int guestCount, string customerEmail)

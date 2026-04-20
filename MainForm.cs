@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using RestoranRezervasyonSistemi.Controllers;
 using RestoranRezervasyonSistemi.Models;
+using RestoranRezervasyonSistemi.Data;
+using RestoranRezervasyonSistemi.Services;
 
 namespace RestoranRezervasyonSistemi
 {
@@ -11,113 +13,113 @@ namespace RestoranRezervasyonSistemi
         public string AktifKullaniciMail { get; set; }
         public User CurrentUser { get; set; }
 
-        private readonly TableController _tableController = new TableController();
-        private readonly ReservationController _reservationController = new ReservationController();
-        private readonly ToolTip _toolTip = new ToolTip
-        {
-            AutoPopDelay = 8000,
-            InitialDelay = 400,
-            ReshowDelay = 200,
-            ShowAlways = true
-        };
+        private readonly TableController _tableController;
+        private readonly ReservationController _reservationController;
+        private readonly TableService _tableService;
+        private readonly ToolTip _toolTip;
 
         public MainForm()
         {
+            _tableController = new TableController();
+            _reservationController = new ReservationController();
+            _tableService = new TableService(_tableController, _reservationController);
+            _toolTip = CreateToolTip();
             InitializeComponent();
+        }
+
+        private ToolTip CreateToolTip()
+        {
+            return new ToolTip
+            {
+                AutoPopDelay = 8000,
+                InitialDelay = 400,
+                ReshowDelay = 200,
+                ShowAlways = true
+            };
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            MasalariYukle();
+            LoadTables();
+            SetupUserManagementButton();
         }
 
-        public void MasalariYukle()
+        private void SetupUserManagementButton()
         {
-            
-            flpMasalar.Controls.Clear();
-
-            var masalar = _tableController.GetAllTables();
-
-            foreach (var masa in masalar)
+            if (CurrentUser?.Role != "Admin")
             {
-                Button btn = new Button();
-
-                
-                string durum = (masa.Status ?? "").ToString().Trim();
-
-                
-                TimeSpan suAnkiSaat = DateTime.Now.TimeOfDay; 
-
-                
-                if (masa.ReservationTime != null)
-                {
-                    TimeSpan rezSaati = (TimeSpan)masa.ReservationTime;
-
-                    // Rezervasyona 30 dakika kala kırmızı yap (Bilgisayar saati bazlı)
-                    if (suAnkiSaat >= rezSaati.Add(TimeSpan.FromMinutes(-30)) &&
-                        suAnkiSaat <= rezSaati.Add(TimeSpan.FromMinutes(150)))
-                    {
-                        btn.BackColor = Color.Firebrick; // KIRMIZI
-                    }
-                    else
-                    {
-                        btn.BackColor = Color.ForestGreen; // YEŞİL
-                    }
-                }
-                else
-                {
-                    btn.BackColor = Color.ForestGreen; // YEŞİL
-                }
-
-                btn.Text = $"{masa.TableName}\n{masa.Location}\n({masa.Capacity} Kişilik)";
-                btn.Name = "btnMasa" + masa.Id;
-                btn.Size = new Size(120, 120);
-                btn.ForeColor = Color.White;
-                btn.FlatStyle = FlatStyle.Flat;
-                btn.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-
-                // Hover bilgisi: sonraki rezervasyon + en erken uygun saat (2.5 saat kuralıyla)
-                var today = DateTime.Today;
-                var now = DateTime.Now.TimeOfDay;
-                var next = _reservationController.GetNextReservationTime(masa.Id, today, now);
-                var earliest = _reservationController.GetEarliestAvailableTime(masa.Id, today, now);
-
-                var nextText = next.HasValue ? next.Value.ToString(@"hh\:mm") : "Yok";
-                var earliestText = earliest.ToString(@"hh\:mm");
-
-                var tooltip = $"{masa.TableName}\nKonum: {masa.Location}\nKapasite: {masa.Capacity}\n" +
-                              $"Sonraki rezervasyon: {nextText}\n" +
-                              $"En erken uygun saat: {earliestText}\n" +
-                              $"Oturma süresi: 2.5 saat";
-
-                _toolTip.SetToolTip(btn, tooltip);
-
-                
-                btn.Click += (s, ev) => {
-                    RezervasyonDetay detay = new RezervasyonDetay();
-                    detay.SecilenMasaAd = masa.TableName;
-                    detay.SecilenMasaId = masa.Id;
-                    detay.GirisYapanAdminMail = this.AktifKullaniciMail;
-                    detay.AktifKullanici = this.CurrentUser;
-                    detay.SecilenMasaKapasite = masa.Capacity;
-
-                    detay.ShowDialog(); // Formu açar ve kapanana kadar bekler
-
-                    // Form kapandıktan sonra masaları tekrar yükle
-                    MasalariYukle();
-                };
-
-                
-                flpMasalar.Controls.Add(btn);
+                btnUserManagement.Visible = false;
+                return;
             }
 
-            
+            btnUserManagement.Click += (s, ev) => {
+                using (var userManagement = new UserManagementForm())
+                {
+                    userManagement.ShowDialog();
+                }
+            };
+        }
+
+        public void LoadTables()
+        {
+            flpMasalar.Controls.Clear();
+
+            var tableButtonInfos = _tableService.GetTableButtonInfos();
+
+            foreach (var tableInfo in tableButtonInfos)
+            {
+                var button = CreateTableButton(tableInfo);
+                flpMasalar.Controls.Add(button);
+            }
+
             flpMasalar.Refresh();
+        }
+
+        private Button CreateTableButton(TableButtonInfo tableInfo)
+        {
+            var table = tableInfo.Table;
+            
+            var button = new Button
+            {
+                Text = FormatButtonText(table),
+                Name = $"btnMasa{table.Id}",
+                Size = new Size(TableConstants.ButtonSize, TableConstants.ButtonSize),
+                BackColor = tableInfo.ButtonColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", TableConstants.ButtonFontSize, FontStyle.Bold)
+            };
+
+            _toolTip.SetToolTip(button, tableInfo.TooltipText);
+            button.Click += (s, ev) => HandleTableClick(table);
+
+            return button;
+        }
+
+        private string FormatButtonText(Table table)
+        {
+            return $"{table.TableName}\n{table.Location}\n({table.Capacity} Kişilik)";
+        }
+
+        private void HandleTableClick(Table table)
+        {
+            using (var rezervasyonDetay = new RezervasyonDetay())
+            {
+                rezervasyonDetay.SecilenMasaAd = table.TableName;
+                rezervasyonDetay.SecilenMasaId = table.Id;
+                rezervasyonDetay.GirisYapanAdminMail = this.AktifKullaniciMail;
+                rezervasyonDetay.AktifKullanici = this.CurrentUser;
+                rezervasyonDetay.SecilenMasaKapasite = table.Capacity;
+
+                rezervasyonDetay.ShowDialog();
+            }
+
+            LoadTables();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            MasalariYukle();
+            LoadTables();
         }
 
         private void pnlTableArea_Paint(object sender, PaintEventArgs e) { }

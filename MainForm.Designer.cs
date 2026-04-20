@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnSettings = new System.Windows.Forms.Button();
+            this.btnUserManagement = new System.Windows.Forms.Button();
             this.btnTables = new System.Windows.Forms.Button();
             this.btnRezervations = new System.Windows.Forms.Button();
             this.btnDashboard = new System.Windows.Forms.Button();
@@ -46,6 +47,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(40)))), ((int)(((byte)(51)))));
             this.panel1.Controls.Add(this.btnSettings);
+            this.panel1.Controls.Add(this.btnUserManagement);
             this.panel1.Controls.Add(this.btnTables);
             this.panel1.Controls.Add(this.btnRezervations);
             this.panel1.Controls.Add(this.btnDashboard);
@@ -64,13 +66,30 @@
             this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSettings.Font = new System.Drawing.Font("Segoe UI", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.btnSettings.ForeColor = System.Drawing.Color.White;
-            this.btnSettings.Location = new System.Drawing.Point(0, 180);
+            this.btnSettings.Location = new System.Drawing.Point(0, 210);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(250, 60);
-            this.btnSettings.TabIndex = 3;
+            this.btnSettings.TabIndex = 4;
             this.btnSettings.Text = "    Ayarlar";
             this.btnSettings.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSettings.UseVisualStyleBackColor = true;
+            // 
+            // btnUserManagement
+            // 
+            this.btnUserManagement.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
+            this.btnUserManagement.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnUserManagement.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnUserManagement.FlatAppearance.BorderSize = 0;
+            this.btnUserManagement.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnUserManagement.Font = new System.Drawing.Font("Segoe UI", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnUserManagement.ForeColor = System.Drawing.Color.White;
+            this.btnUserManagement.Location = new System.Drawing.Point(0, 150);
+            this.btnUserManagement.Name = "btnUserManagement";
+            this.btnUserManagement.Size = new System.Drawing.Size(250, 60);
+            this.btnUserManagement.TabIndex = 3;
+            this.btnUserManagement.Text = "    Kullanici Yönetimi";
+            this.btnUserManagement.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnUserManagement.UseVisualStyleBackColor = false;
             // 
             // btnTables
             // 
@@ -180,6 +199,7 @@
 
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnSettings;
+        private System.Windows.Forms.Button btnUserManagement;
         private System.Windows.Forms.Button btnTables;
         private System.Windows.Forms.Button btnRezervations;
         private System.Windows.Forms.Button btnDashboard;

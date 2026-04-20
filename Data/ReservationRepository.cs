@@ -229,6 +229,42 @@ namespace RestoranRezervasyonSistemi.Data
                 }
             }
         }
+
+        public List<Reservation> GetAllReservations()
+        {
+            var reservations = new List<Reservation>();
+            
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                const string sql = @"SELECT id, table_id, customer_name, customer_phone, reservation_date, guest_count, reservation_time, customer_email 
+                                   FROM reservations 
+                                   ORDER BY reservation_date, reservation_time";
+                
+                using (var cmd = new SqlCommand(sql, conn))
+                {
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            reservations.Add(new Reservation
+                            {
+                                Id = Convert.ToInt32(dr["id"]),
+                                TableId = Convert.ToInt32(dr["table_id"]),
+                                CustomerName = dr["customer_name"]?.ToString(),
+                                CustomerPhone = dr["customer_phone"]?.ToString(),
+                                ReservationDate = Convert.ToDateTime(dr["reservation_date"]),
+                                GuestCount = Convert.ToInt32(dr["guest_count"]),
+                                ReservationTime = (TimeSpan)dr["reservation_time"],
+                                CustomerEmail = dr["customer_email"]?.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return reservations;
+        }
     }
 }
 

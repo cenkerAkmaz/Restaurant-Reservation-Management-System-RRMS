@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using RestoranRezervasyonSistemi.Views;
 using RestoranRezervasyonSistemi.Controllers;
@@ -26,6 +27,18 @@ namespace RestoranRezervasyonSistemi
 
                 if (currentUser == null)
                 {
+                    // Banlı kullanıcı mı diye kontrol et
+                    var allUsers = _loginController.GetAllUsers();
+                    var userToCheck = allUsers?.FirstOrDefault(u => 
+                        u.Username.Equals(identifier, StringComparison.OrdinalIgnoreCase) || 
+                        u.FullName.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (userToCheck != null && userToCheck.IsBanned)
+                    {
+                        MessageBox.Show("Hesabınız banlanmıştır. Lütfen yönetici ile iletişime geçin.");
+                        return;
+                    }
+                    
                     MessageBox.Show("Kullanıcı adı veya şifre hatalı!");
                     return;
                 }
@@ -51,7 +64,15 @@ namespace RestoranRezervasyonSistemi
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Hata: " + ex.Message);
+                // Ban mesajını ayrı yakala
+                if (ex.Message.Contains("banlanmıştır"))
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                else
+                {
+                    MessageBox.Show("Hata: " + ex.Message);
+                }
             }
         }
 

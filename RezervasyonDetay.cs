@@ -34,6 +34,12 @@ namespace RestoranRezervasyonSistemi
             InitializeComponent();
         }
 
+        public RezervasyonDetay(int reservationId)
+        {
+            InitializeComponent();
+            _currentUserReservationId = reservationId;
+        }
+
         private void RezervasyonDetay_Load(object sender, EventArgs e)
         {
             lblBilgi.Text = SecilenMasaAd + " Rezervasyon İşlemi";
