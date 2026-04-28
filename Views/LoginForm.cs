@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Windows.Forms;
-using RestoranRezervasyonSistemi.Views;
 using RestoranRezervasyonSistemi.Controllers;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class LoginForm : Form
     {
@@ -27,19 +25,7 @@ namespace RestoranRezervasyonSistemi
 
                 if (currentUser == null)
                 {
-                    // Banlı kullanıcı mı diye kontrol et
-                    var allUsers = _loginController.GetAllUsers();
-                    var userToCheck = allUsers?.FirstOrDefault(u => 
-                        u.Username.Equals(identifier, StringComparison.OrdinalIgnoreCase) || 
-                        u.FullName.Equals(identifier, StringComparison.OrdinalIgnoreCase));
-                    
-                    if (userToCheck != null && userToCheck.IsBanned)
-                    {
-                        MessageBox.Show("Hesabınız banlanmıştır. Lütfen yönetici ile iletişime geçin.");
-                        return;
-                    }
-                    
-                    MessageBox.Show("Kullanıcı adı veya şifre hatalı!");
+                    MessageBox.Show("Kullanıcı adı veya şifre hatalı veya hesabınız banlanmış olabilir.");
                     return;
                 }
 
@@ -60,32 +46,24 @@ namespace RestoranRezervasyonSistemi
                     main.Show();
                 }
 
-                Hide(); // Login formunu gizle
+                Hide();
             }
             catch (Exception ex)
             {
-                // Ban mesajını ayrı yakala
-                if (ex.Message.Contains("banlanmıştır"))
-                {
-                    MessageBox.Show(ex.Message);
-                }
-                else
-                {
-                    MessageBox.Show("Hata: " + ex.Message);
-                }
+                MessageBox.Show("Hata: " + ex.Message);
             }
         }
 
         private void btnGoRegister_Click(object sender, EventArgs e)
         {
-            RegisterForm rf = new RegisterForm();
+            var rf = new RegisterForm();
             rf.Show();
             this.Hide();
         }
 
         private void btnForgotPassword_Click(object sender, EventArgs e)
         {
-            ForgotPasswordForm fp = new ForgotPasswordForm();
+            var fp = new ForgotPasswordForm();
             fp.Show();
             this.Hide();
         }

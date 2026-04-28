@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using RestoranRezervasyonSistemi.Controllers;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class ForgotPasswordForm : Form
     {

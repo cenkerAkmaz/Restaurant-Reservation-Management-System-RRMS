@@ -1,4 +1,4 @@
-﻿namespace RestoranRezervasyonSistemi
+﻿namespace RestoranRezervasyonSistemi.Views
 {
     partial class RezervasyonDetay
     {
@@ -41,7 +41,15 @@
             this.nmrKisiSayisi = new System.Windows.Forms.NumericUpDown();
             this.lblSaat = new System.Windows.Forms.Label();
             this.dtpSaat = new System.Windows.Forms.DateTimePicker();
+            this.grpYemekSecimi = new System.Windows.Forms.GroupBox();
+            this.lstYemekSecimi = new System.Windows.Forms.ListView();
+            this.colYemekAdi = new System.Windows.Forms.ColumnHeader();
+            this.colFiyat = new System.Windows.Forms.ColumnHeader();
+            this.colAdet = new System.Windows.Forms.ColumnHeader();
+            this.lblToplamFiyat = new System.Windows.Forms.Label();
+            this.picYemekResmi = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.nmrKisiSayisi)).BeginInit();
+            this.grpYemekSecimi.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblBilgi
@@ -182,12 +190,77 @@
             this.dtpSaat.Size = new System.Drawing.Size(280, 22);
             this.dtpSaat.TabIndex = 11;
             // 
+            // grpYemekSecimi
+            // 
+            this.grpYemekSecimi.Controls.Add(this.lstYemekSecimi);
+            this.grpYemekSecimi.ForeColor = System.Drawing.Color.White;
+            this.grpYemekSecimi.Location = new System.Drawing.Point(350, 30);
+            this.grpYemekSecimi.Name = "grpYemekSecimi";
+            this.grpYemekSecimi.Size = new System.Drawing.Size(280, 450);
+            this.grpYemekSecimi.TabIndex = 12;
+            this.grpYemekSecimi.TabStop = false;
+            this.grpYemekSecimi.Text = "Yemek Seçimi (Opsiyonel)";
+            // 
+            // lstYemekSecimi
+            // 
+            this.lstYemekSecimi.CheckBoxes = true;
+            this.lstYemekSecimi.FullRowSelect = true;
+            this.lstYemekSecimi.GridLines = true;
+            this.lstYemekSecimi.Location = new System.Drawing.Point(10, 20);
+            this.lstYemekSecimi.MultiSelect = false;
+            this.lstYemekSecimi.Name = "lstYemekSecimi";
+            this.lstYemekSecimi.Size = new System.Drawing.Size(250, 400);
+            this.lstYemekSecimi.TabIndex = 0;
+            this.lstYemekSecimi.UseCompatibleStateImageBehavior = false;
+            this.lstYemekSecimi.View = System.Windows.Forms.View.Details;
+            this.lstYemekSecimi.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.LstYemekSecimi_ItemCheck);
+            this.lstYemekSecimi.SelectedIndexChanged += new System.EventHandler(this.LstYemekSecimi_SelectedIndexChanged);
+            this.lstYemekSecimi.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstYemekSecimi_MouseDoubleClick);
+            // 
+            // colYemekAdi
+            // 
+            this.colYemekAdi.Text = "Yemek Adı";
+            this.colYemekAdi.Width = 120;
+            // 
+            // colFiyat
+            // 
+            this.colFiyat.Text = "Fiyat";
+            this.colFiyat.Width = 60;
+            // 
+            // colAdet
+            // 
+            this.colAdet.Text = "Adet";
+            this.colAdet.Width = 50;
+            // 
+            // lblToplamFiyat
+            // 
+            this.lblToplamFiyat.AutoSize = true;
+            this.lblToplamFiyat.ForeColor = System.Drawing.Color.White;
+            this.lblToplamFiyat.Location = new System.Drawing.Point(350, 490);
+            this.lblToplamFiyat.Name = "lblToplamFiyat";
+            this.lblToplamFiyat.Size = new System.Drawing.Size(85, 16);
+            this.lblToplamFiyat.TabIndex = 13;
+            this.lblToplamFiyat.Text = "Toplam Fiyat:";
+            // 
+            // picYemekResmi
+            // 
+            this.picYemekResmi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picYemekResmi.Location = new System.Drawing.Point(650, 30);
+            this.picYemekResmi.Name = "picYemekResmi";
+            this.picYemekResmi.Size = new System.Drawing.Size(200, 150);
+            this.picYemekResmi.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picYemekResmi.TabIndex = 14;
+            this.picYemekResmi.TabStop = false;
+            // 
             // RezervasyonDetay
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(370, 493);
+            this.ClientSize = new System.Drawing.Size(900, 600);
+            this.Controls.Add(this.picYemekResmi);
+            this.Controls.Add(this.lblToplamFiyat);
+            this.Controls.Add(this.grpYemekSecimi);
             this.Controls.Add(this.dtpSaat);
             this.Controls.Add(this.lblSaat);
             this.Controls.Add(this.nmrKisiSayisi);
@@ -206,6 +279,7 @@
             this.Text = "Masa Rezervasyon İşlemleri";
             this.Load += new System.EventHandler(this.RezervasyonDetay_Load);
             ((System.ComponentModel.ISupportInitialize)(this.nmrKisiSayisi)).EndInit();
+            this.grpYemekSecimi.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -226,5 +300,12 @@
         private System.Windows.Forms.NumericUpDown nmrKisiSayisi;
         private System.Windows.Forms.Label lblSaat;
         private System.Windows.Forms.DateTimePicker dtpSaat;
+        private System.Windows.Forms.GroupBox grpYemekSecimi;
+        private System.Windows.Forms.ListView lstYemekSecimi;
+        private System.Windows.Forms.ColumnHeader colYemekAdi;
+        private System.Windows.Forms.ColumnHeader colFiyat;
+        private System.Windows.Forms.ColumnHeader colAdet;
+        private System.Windows.Forms.Label lblToplamFiyat;
+        private System.Windows.Forms.PictureBox picYemekResmi;
     }
 }

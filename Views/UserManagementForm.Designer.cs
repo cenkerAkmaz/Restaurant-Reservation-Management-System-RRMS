@@ -1,4 +1,4 @@
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     partial class UserManagementForm
     {
@@ -28,16 +28,6 @@ namespace RestoranRezervasyonSistemi
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.SuspendLayout();
-
-            // Form properties
-            this.Text = "Kullanıcı Yönetimi";
-            this.Size = new System.Drawing.Size(800, 600);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.BackColor = System.Drawing.Color.FromArgb(240, 240, 240);
-
-            // Main panel
             this.mainPanel = new System.Windows.Forms.Panel();
             this.titleLabel = new System.Windows.Forms.Label();
             this.usersListView = new System.Windows.Forms.ListView();
@@ -46,6 +36,13 @@ namespace RestoranRezervasyonSistemi
             this.unbanButton = new System.Windows.Forms.Button();
             this.refreshButton = new System.Windows.Forms.Button();
             this.closeButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+
+            // Form properties
+            this.Text = "Kullanıcı Yönetimi";
+            this.Size = new System.Drawing.Size(800, 600);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.BackColor = System.Drawing.Color.FromArgb(240, 240, 240);
 
             // mainPanel
             this.mainPanel.Dock = System.Windows.Forms.DockStyle.Fill;

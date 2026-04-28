@@ -210,12 +210,14 @@ namespace RestoranRezervasyonSistemi.Data
             }
         }
 
-        public void InsertReservation(Reservation reservation)
+        public int InsertReservation(Reservation reservation)
         {
             using (var conn = _db.GetConnection())
             {
                 conn.Open();
-                const string sql = "INSERT INTO reservations (table_id, customer_name, customer_phone, reservation_date, guest_count, reservation_time, customer_email) VALUES (@tid, @name, @phone, @date, @count, @time, @mail)";
+                const string sql = @"INSERT INTO reservations (table_id, customer_name, customer_phone, reservation_date, guest_count, reservation_time, customer_email) 
+                                   VALUES (@tid, @name, @phone, @date, @count, @time, @mail);
+                                   SELECT CAST(SCOPE_IDENTITY() as int)";
                 using (var cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@tid", reservation.TableId);
@@ -225,7 +227,7 @@ namespace RestoranRezervasyonSistemi.Data
                     cmd.Parameters.AddWithValue("@count", reservation.GuestCount);
                     cmd.Parameters.AddWithValue("@time", reservation.ReservationTime);
                     cmd.Parameters.AddWithValue("@mail", reservation.CustomerEmail);
-                    cmd.ExecuteNonQuery();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
         }

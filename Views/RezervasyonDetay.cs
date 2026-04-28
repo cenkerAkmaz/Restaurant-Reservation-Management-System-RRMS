@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using RestoranRezervasyonSistemi.Controllers;
 using RestoranRezervasyonSistemi.Services;
 using RestoranRezervasyonSistemi.Models;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class RezervasyonDetay : Form
     {
@@ -28,6 +29,11 @@ namespace RestoranRezervasyonSistemi
         private readonly ReservationController _reservationController = new ReservationController();
         private readonly SmtpEmailService _emailService = new SmtpEmailService();
         private int? _currentUserReservationId;
+
+        // 9. hafta kodları eklendi - Menü ve yemek seçimi
+        private readonly MenuController _menuController = new MenuController();
+        private Dictionary<int, Models.MenuItem> _menuItemsCache;
+        private Dictionary<int, int> _yemekAdetleri = new Dictionary<int, int>(); // MenuItemId, Adet
 
         public RezervasyonDetay()
         {
@@ -64,6 +70,127 @@ namespace RestoranRezervasyonSistemi
             dtpTarih.ValueChanged += (s, ev) => UpdateCancelButtonState();
             dtpSaat.ValueChanged += (s, ev) => UpdateCancelButtonState();
             UpdateCancelButtonState();
+
+            // 9. hafta: Menüyü yükle
+            LoadMenuItems();
+        }
+
+        private void LoadMenuItems()
+        {
+            try
+            {
+                var menuItems = _menuController.GetAllMenuItems();
+                _menuItemsCache = menuItems.ToDictionary(m => m.Id);
+
+                lstYemekSecimi.Items.Clear();
+                lstYemekSecimi.Columns.Clear();
+                lstYemekSecimi.Columns.Add(colYemekAdi);
+                lstYemekSecimi.Columns.Add(colFiyat);
+                lstYemekSecimi.Columns.Add(colAdet);
+
+                foreach (var item in menuItems)
+                {
+                    var listViewItem = new ListViewItem(new string[] { item.Name, $"{item.Price:F2} TL", "1" });
+                    listViewItem.Tag = item.Id;
+                    lstYemekSecimi.Items.Add(listViewItem);
+                    
+                    // Varsayılan adet 1 olarak ayarla
+                    _yemekAdetleri[item.Id] = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Menü yüklenirken hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LstYemekSecimi_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            this.BeginInvoke((MethodInvoker)delegate
+            {
+                UpdateTotalPrice();
+            });
+        }
+
+        private void LstYemekSecimi_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Seçili yemeğin resmini göster
+            ShowFoodImage();
+            UpdateTotalPrice();
+        }
+
+        private void ShowFoodImage()
+        {
+            if (lstYemekSecimi.SelectedItems.Count > 0 && _menuItemsCache != null)
+            {
+                var selectedItem = lstYemekSecimi.SelectedItems[0];
+                var menuItemId = (int)selectedItem.Tag;
+                
+                if (_menuItemsCache.ContainsKey(menuItemId))
+                {
+                    var menuItem = _menuItemsCache[menuItemId];
+                    LoadFoodImage(menuItem.ImagePath);
+                }
+            }
+        }
+
+        private void LoadFoodImage(string imagePath)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                {
+                    picYemekResmi.Image = Image.FromFile(imagePath);
+                }
+                else
+                {
+                    // Varsayılan resim veya resim yoksa boş bırak
+                    picYemekResmi.Image = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Resim yüklenemezse hata vermeden devam et
+                picYemekResmi.Image = null;
+            }
+        }
+
+        private void lstYemekSecimi_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstYemekSecimi.SelectedItems.Count > 0)
+            {
+                var selectedItem = lstYemekSecimi.SelectedItems[0];
+                var menuItemId = (int)selectedItem.Tag;
+                var currentAdet = _yemekAdetleri.ContainsKey(menuItemId) ? _yemekAdetleri[menuItemId] : 1;
+                
+                using (var adetForm = new AdetGirisiForm(currentAdet))
+                {
+                    if (adetForm.ShowDialog() == DialogResult.OK)
+                    {
+                        _yemekAdetleri[menuItemId] = adetForm.SecilenAdet;
+                        selectedItem.SubItems[2].Text = adetForm.SecilenAdet.ToString();
+                        UpdateTotalPrice();
+                    }
+                }
+            }
+        }
+
+        private void UpdateTotalPrice()
+        {
+            decimal total = 0;
+
+            for (int i = 0; i < lstYemekSecimi.Items.Count; i++)
+            {
+                if (lstYemekSecimi.Items[i].Checked && _menuItemsCache != null)
+                {
+                    var menuItemId = (int)lstYemekSecimi.Items[i].Tag;
+                    var menuItem = _menuItemsCache[menuItemId];
+                    var adet = _yemekAdetleri.ContainsKey(menuItemId) ? _yemekAdetleri[menuItemId] : 1;
+                    total += menuItem.Price * adet;
+                }
+            }
+
+            lblToplamFiyat.Text = $"Toplam Fiyat: {total:F2} TL";
         }
 
         private void UpdateCancelButtonState()
@@ -127,7 +254,7 @@ namespace RestoranRezervasyonSistemi
                 _emailService.Send(GirisYapanAdminMail, "Rezervasyon İşlem Onayı", $"Onay kodunuz: {dogrulamaKodu}");
                 MessageBox.Show($"Güvenlik kodu {GirisYapanAdminMail} adresine gönderildi.", "Onay Gerekli");
 
-                var onayEkrani = new RestoranRezervasyonSistemi.Views.IslemOnay();
+                var onayEkrani = new IslemOnay();
                 onayEkrani.GonderilenKod = dogrulamaKodu;
 
                 if (onayEkrani.ShowDialog() == DialogResult.OK)
@@ -142,7 +269,7 @@ namespace RestoranRezervasyonSistemi
         {
             try
             {
-                _reservationController.CreateReservation(
+                int reservationId = _reservationController.CreateReservation(
                     tableId: SecilenMasaId,
                     customerName: txtMusteriAd.Text,
                     customerPhone: txtMusteriTel.Text,
@@ -152,10 +279,43 @@ namespace RestoranRezervasyonSistemi
                     customerEmail: GirisYapanAdminMail
                 );
 
+                // 9. hafta: Seçilen yemekleri kaydet
+                SaveSelectedMenuItems(reservationId);
+
                 MessageBox.Show("Başarıyla rezerve edildi!");
                 Close();
             }
             catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
+        }
+
+        private void SaveSelectedMenuItems(int reservationId)
+        {
+            try
+            {
+                if (_menuItemsCache == null) return;
+
+                var selectedItems = new List<(int MenuItemId, int Quantity)>();
+
+                for (int i = 0; i < lstYemekSecimi.Items.Count; i++)
+                {
+                    if (lstYemekSecimi.Items[i].Checked)
+                    {
+                        var menuItemId = (int)lstYemekSecimi.Items[i].Tag;
+                        var adet = _yemekAdetleri.ContainsKey(menuItemId) ? _yemekAdetleri[menuItemId] : 1;
+                        selectedItems.Add((menuItemId, adet));
+                    }
+                }
+
+                if (selectedItems.Any())
+                {
+                    _menuController.AddReservationMenuItems(reservationId, selectedItems);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Yemek seçimi hatası rezervasyonu engellemesin
+                MessageBox.Show("Yemek seçimi kaydedilirken hata oluştu: " + ex.Message, "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private bool CakismaVarMi(int masaId, DateTime tarih, TimeSpan saat)

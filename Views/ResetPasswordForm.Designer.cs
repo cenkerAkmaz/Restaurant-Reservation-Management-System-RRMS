@@ -1,4 +1,4 @@
-﻿namespace RestoranRezervasyonSistemi
+﻿namespace RestoranRezervasyonSistemi.Views
 {
     partial class ResetPasswordForm
     {

@@ -10,15 +10,17 @@ namespace RestoranRezervasyonSistemi.Views
 {
     public partial class AdminPanel : Form
     {
-        TableController tableController = new TableController();
-        ReservationController reservationController = new ReservationController();
-        UserController userController = new UserController();
+        private readonly AdminPanelService _adminService;
         private List<User> _users;
         private List<Reservation> _reservations;
 
         public AdminPanel()
         {
             InitializeComponent();
+            _adminService = new AdminPanelService(
+                new TableController(),
+                new UserController(),
+                new ReservationController());
         }
 
         private void AdminPanel_Load(object sender, EventArgs e)
@@ -28,98 +30,76 @@ namespace RestoranRezervasyonSistemi.Views
             LoadReservations();
         }
 
+        private void btnMenuYonetimi_Click(object sender, EventArgs e)
+        {
+            var menuForm = new MenuYonetimForm();
+            menuForm.ShowDialog();
+        }
+
         private void LoadTables()
         {
+            var tables = _adminService.LoadTables();
             dgvMasalar.DataSource = null;
-            dgvMasalar.DataSource = tableController.GetAllTables();
+            dgvMasalar.DataSource = tables;
 
-            if (dgvMasalar.Columns["Id"] != null) dgvMasalar.Columns["Id"].HeaderText = "No";
-            if (dgvMasalar.Columns["TableName"] != null) dgvMasalar.Columns["TableName"].HeaderText = "Masa Adı";
-            if (dgvMasalar.Columns["Capacity"] != null) dgvMasalar.Columns["Capacity"].HeaderText = "Kapasite";
-            if (dgvMasalar.Columns["Location"] != null) dgvMasalar.Columns["Location"].HeaderText = "Konum";
+            var tableHeaders = new Dictionary<string, string>
+            {
+                { "Id", "No" },
+                { "TableName", "Masa Adı" },
+                { "Capacity", "Kapasite" },
+                { "Location", "Konum" }
+            };
+            _adminService.SetDataGridViewColumnHeaders(dgvMasalar, tableHeaders);
         }
 
         private void LoadUsers()
         {
-            try
-            {
-                _users = userController.GetAllUsers();
-                dgvUsers.DataSource = null;
-                dgvUsers.DataSource = _users;
+            _users = _adminService.LoadUsers();
+            dgvUsers.DataSource = null;
+            dgvUsers.DataSource = _users;
 
-                if (dgvUsers.Columns["Id"] != null) dgvUsers.Columns["Id"].HeaderText = "ID";
-                if (dgvUsers.Columns["Username"] != null) dgvUsers.Columns["Username"].HeaderText = "Kullanıcı Adı";
-                if (dgvUsers.Columns["FullName"] != null) dgvUsers.Columns["FullName"].HeaderText = "Tam Ad";
-                if (dgvUsers.Columns["Email"] != null) dgvUsers.Columns["Email"].HeaderText = "E-posta";
-                if (dgvUsers.Columns["Phone"] != null) dgvUsers.Columns["Phone"].HeaderText = "Telefon";
-                if (dgvUsers.Columns["Role"] != null) dgvUsers.Columns["Role"].HeaderText = "Rol";
-                if (dgvUsers.Columns["IsBanned"] != null) dgvUsers.Columns["IsBanned"].HeaderText = "Durum";
-
-                // Banlı kullanıcıları renklendir
-                foreach (DataGridViewRow row in dgvUsers.Rows)
-                {
-                    bool isBanned = Convert.ToBoolean(row.Cells["IsBanned"].Value);
-                    if (isBanned)
-                    {
-                        row.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(255, 230, 230);
-                        row.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(180, 0, 0);
-                    }
-                    else
-                    {
-                        row.DefaultCellStyle.BackColor = System.Drawing.Color.White;
-                        row.DefaultCellStyle.ForeColor = System.Drawing.Color.Black;
-                    }
-                }
-            }
-            catch (Exception ex)
+            var userHeaders = new Dictionary<string, string>
             {
-                DialogService.ShowError($"Kullanıcılar yüklenirken hata: {ex.Message}");
-            }
+                { "Id", "ID" },
+                { "Username", "Kullanıcı Adı" },
+                { "FullName", "Tam Ad" },
+                { "Email", "E-posta" },
+                { "Phone", "Telefon" },
+                { "Role", "Rol" },
+                { "IsBanned", "Durum" }
+            };
+            _adminService.SetDataGridViewColumnHeaders(dgvUsers, userHeaders);
+            _adminService.StyleUserDataGridView(dgvUsers);
         }
 
         private void LoadReservations()
         {
-            try
-            {
-                _reservations = reservationController.GetAllReservations();
-                dgvRezervasyonlar.DataSource = null;
-                dgvRezervasyonlar.DataSource = _reservations;
+            _reservations = _adminService.LoadReservations();
+            dgvRezervasyonlar.DataSource = null;
+            dgvRezervasyonlar.DataSource = _reservations;
 
-                if (dgvRezervasyonlar.Columns["Id"] != null) dgvRezervasyonlar.Columns["Id"].HeaderText = "ID";
-                if (dgvRezervasyonlar.Columns["CustomerName"] != null) dgvRezervasyonlar.Columns["CustomerName"].HeaderText = "Müşteri Adı";
-                if (dgvRezervasyonlar.Columns["CustomerPhone"] != null) dgvRezervasyonlar.Columns["CustomerPhone"].HeaderText = "Telefon";
-                if (dgvRezervasyonlar.Columns["CustomerEmail"] != null) dgvRezervasyonlar.Columns["CustomerEmail"].HeaderText = "E-posta";
-                if (dgvRezervasyonlar.Columns["ReservationDate"] != null) dgvRezervasyonlar.Columns["ReservationDate"].HeaderText = "Tarih";
-                if (dgvRezervasyonlar.Columns["ReservationTime"] != null) dgvRezervasyonlar.Columns["ReservationTime"].HeaderText = "Saat";
-                if (dgvRezervasyonlar.Columns["TableId"] != null) dgvRezervasyonlar.Columns["TableId"].HeaderText = "Masa ID";
-                if (dgvRezervasyonlar.Columns["GuestCount"] != null) dgvRezervasyonlar.Columns["GuestCount"].HeaderText = "Kişi Sayısı";
-            }
-            catch (Exception ex)
+            var reservationHeaders = new Dictionary<string, string>
             {
-                DialogService.ShowError($"Rezervasyonlar yüklenirken hata: {ex.Message}");
-            }
+                { "Id", "ID" },
+                { "CustomerName", "Müşteri Adı" },
+                { "CustomerPhone", "Telefon" },
+                { "CustomerEmail", "E-posta" },
+                { "ReservationDate", "Tarih" },
+                { "ReservationTime", "Saat" },
+                { "TableId", "Masa ID" },
+                { "GuestCount", "Kişi Sayısı" }
+            };
+            _adminService.SetDataGridViewColumnHeaders(dgvRezervasyonlar, reservationHeaders);
         }
 
         // MASAYÖNETİM BUTONLARI
         private void btnEkle_Click(object sender, EventArgs e)
         {
-            try
+            if (_adminService.AddTable(txtMasaAdi.Text, int.Parse(txtKapasite.Text), txtKonum.Text))
             {
-                Table yeniMasa = new Table
-                {
-                    TableName = txtMasaAdi.Text,
-                    Capacity = int.Parse(txtKapasite.Text),
-                    Location = txtKonum.Text
-                };
-
-                if (tableController.AddTable(yeniMasa))
-                {
-                    DialogService.ShowInfo("Masa başarıyla eklendi!");
-                    LoadTables();
-                    ClearTableFields();
-                }
+                LoadTables();
+                ClearTableFields();
             }
-            catch (Exception ex) { DialogService.ShowError($"Hata: {ex.Message}"); }
         }
 
         private void btnSil_Click(object sender, EventArgs e)
@@ -127,14 +107,10 @@ namespace RestoranRezervasyonSistemi.Views
             if (dgvMasalar.CurrentRow != null)
             {
                 int id = Convert.ToInt32(dgvMasalar.CurrentRow.Cells["Id"].Value);
-                if (DialogService.ShowConfirmation("Seçili masayı silmek istediğinize emin misiniz?", "Silme Onayı"))
+                if (_adminService.DeleteTable(id))
                 {
-                    if (tableController.DeleteTable(id))
-                    {
-                        DialogService.ShowInfo("Masa başarıyla silindi.");
-                        LoadTables();
-                        ClearTableFields();
-                    }
+                    LoadTables();
+                    ClearTableFields();
                 }
             }
         }
@@ -143,24 +119,12 @@ namespace RestoranRezervasyonSistemi.Views
         {
             if (dgvMasalar.CurrentRow != null)
             {
-                try
+                int id = Convert.ToInt32(dgvMasalar.CurrentRow.Cells["Id"].Value);
+                if (_adminService.UpdateTable(id, txtMasaAdi.Text, int.Parse(txtKapasite.Text), txtKonum.Text))
                 {
-                    Table guncellenecek = new Table
-                    {
-                        Id = Convert.ToInt32(dgvMasalar.CurrentRow.Cells["Id"].Value),
-                        TableName = txtMasaAdi.Text,
-                        Capacity = int.Parse(txtKapasite.Text),
-                        Location = txtKonum.Text
-                    };
-
-                    if (tableController.UpdateTable(guncellenecek))
-                    {
-                        DialogService.ShowInfo("Masa bilgileri güncellendi.");
-                        LoadTables();
-                        ClearTableFields();
-                    }
+                    LoadTables();
+                    ClearTableFields();
                 }
-                catch (Exception ex) { DialogService.ShowError($"Hata: {ex.Message}"); }
             }
         }
 
@@ -184,54 +148,24 @@ namespace RestoranRezervasyonSistemi.Views
         // KULLANICI YÖNETİM BUTONLARI
         private void btnBanUser_Click(object sender, EventArgs e)
         {
-            if (!ValidateUserSelection())
-                return;
-
-            var selectedUser = GetSelectedUser();
-            if (DialogService.ShowConfirmation($"{selectedUser.FullName} kullanıcısını banlamak istediğinizden emin misiniz?", "Ban Onayı"))
+            if (_adminService.ValidateUserSelection(dgvUsers))
             {
-                try
+                var selectedUser = _adminService.GetSelectedUser(dgvUsers, _users);
+                if (_adminService.BanUser(selectedUser))
                 {
-                    if (userController.BanUser(selectedUser.Id, selectedUser.FullName))
-                    {
-                        DialogService.ShowInfo("Kullanıcı başarıyla banlandı.");
-                        LoadUsers();
-                    }
-                    else
-                    {
-                        DialogService.ShowError("Banlama işlemi başarısız oldu.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DialogService.ShowError($"Hata: {ex.Message}");
+                    LoadUsers();
                 }
             }
         }
 
         private void btnUnbanUser_Click(object sender, EventArgs e)
         {
-            if (!ValidateUserSelection())
-                return;
-
-            var selectedUser = GetSelectedUser();
-            if (DialogService.ShowConfirmation($"{selectedUser.FullName} kullanıcısının banını kaldırmak istediğinizden emin misiniz?", "Ban Kaldırma Onayı"))
+            if (_adminService.ValidateUserSelection(dgvUsers))
             {
-                try
+                var selectedUser = _adminService.GetSelectedUser(dgvUsers, _users);
+                if (_adminService.UnbanUser(selectedUser))
                 {
-                    if (userController.UnbanUser(selectedUser.Id, selectedUser.FullName))
-                    {
-                        DialogService.ShowInfo("Kullanıcının banı başarıyla kaldırıldı.");
-                        LoadUsers();
-                    }
-                    else
-                    {
-                        DialogService.ShowError("Ban kaldırma işlemi başarısız oldu.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DialogService.ShowError($"Hata: {ex.Message}");
+                    LoadUsers();
                 }
             }
         }
@@ -242,47 +176,15 @@ namespace RestoranRezervasyonSistemi.Views
             DialogService.ShowInfo("Kullanıcı listesi yenilendi.");
         }
 
-        private bool ValidateUserSelection()
-        {
-            if (dgvUsers.SelectedRows.Count == 0)
-            {
-                DialogService.ShowWarning("Lütfen bir kullanıcı seçin.");
-                return false;
-            }
-            return true;
-        }
-
-        private User GetSelectedUser()
-        {
-            var selectedRow = dgvUsers.SelectedRows[0];
-            int userId = Convert.ToInt32(selectedRow.Cells["Id"].Value);
-            return _users.FirstOrDefault(u => u.Id == userId);
-        }
-
         // REZERVASYON YÖNETİM BUTONLARI
         private void btnCancelReservation_Click(object sender, EventArgs e)
         {
-            if (!ValidateReservationSelection())
-                return;
-
-            var selectedReservation = GetSelectedReservation();
-            if (DialogService.ShowConfirmation($"{selectedReservation.CustomerName} kullanıcısının rezervasyonunu iptal etmek istediğinizden emin misiniz?", "Rezervasyon İptal Onayı"))
+            if (_adminService.ValidateReservationSelection(dgvRezervasyonlar))
             {
-                try
+                var selectedReservation = _adminService.GetSelectedReservation(dgvRezervasyonlar, _reservations);
+                if (_adminService.CancelReservation(selectedReservation))
                 {
-                    if (reservationController.CancelById(selectedReservation.Id))
-                    {
-                        DialogService.ShowInfo("Rezervasyon başarıyla iptal edildi.");
-                        LoadReservations();
-                    }
-                    else
-                    {
-                        DialogService.ShowError("Rezervasyon iptal işlemi başarısız oldu.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DialogService.ShowError($"Hata: {ex.Message}");
+                    LoadReservations();
                 }
             }
         }
@@ -293,23 +195,6 @@ namespace RestoranRezervasyonSistemi.Views
             DialogService.ShowInfo("Rezervasyon listesi yenilendi.");
         }
 
-        private bool ValidateReservationSelection()
-        {
-            if (dgvRezervasyonlar.SelectedRows.Count == 0)
-            {
-                DialogService.ShowWarning("Lütfen bir rezervasyon seçin.");
-                return false;
-            }
-            return true;
-        }
-
-        private Reservation GetSelectedReservation()
-        {
-            var selectedRow = dgvRezervasyonlar.SelectedRows[0];
-            int reservationId = Convert.ToInt32(selectedRow.Cells["Id"].Value);
-            return _reservations.FirstOrDefault(r => r.Id == reservationId);
-        }
-
         private void dgvUsers_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             // DataGridView click event - optional functionality
@@ -317,7 +202,112 @@ namespace RestoranRezervasyonSistemi.Views
 
         private void dgvRezervasyonlar_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // DataGridView click event - optional functionality
+            if (dgvRezervasyonlar.CurrentRow != null)
+            {
+                var selectedReservation = _adminService.GetSelectedReservation(dgvRezervasyonlar, _reservations);
+                if (selectedReservation != null)
+                {
+                    LoadReservationMenuItems(selectedReservation.Id);
+                }
+            }
+        }
+
+        private void LoadReservationMenuItems(int reservationId)
+        {
+            try
+            {
+                var menuController = new MenuController();
+                var menuItems = menuController.GetReservationMenuItems(reservationId);
+                
+                lstRezervasyonMenuleri.Items.Clear();
+                
+                if (menuItems.Count > 0)
+                {
+                    foreach (var item in menuItems)
+                    {
+                        string menuItemName = menuController.GetMenuItemById(item.MenuItemId)?.Name ?? "Bilinmeyen Ürün";
+                        lstRezervasyonMenuleri.Items.Add($"{menuItemName} - Adet: {item.Quantity} - Fiyat: {item.TotalPrice:F2} TL");
+                    }
+                }
+                else
+                {
+                    lstRezervasyonMenuleri.Items.Add("Bu rezervasyona ait menü seçimi bulunmamaktadır.");
+                }
+            }
+            catch (Exception ex)
+            {
+                lstRezervasyonMenuleri.Items.Clear();
+                lstRezervasyonMenuleri.Items.Add($"Menü bilgileri yüklenemedi: {ex.Message}");
+            }
+        }
+
+        private void btnRezervasyonDetaylari_Click(object sender, EventArgs e)
+        {
+            if (dgvRezervasyonlar.CurrentRow != null)
+            {
+                var selectedReservation = _adminService.GetSelectedReservation(dgvRezervasyonlar, _reservations);
+                if (selectedReservation != null)
+                {
+                    ShowReservationDetails(selectedReservation);
+                }
+                else
+                {
+                    DialogService.ShowError("Lütfen bir rezervasyon seçin.");
+                }
+            }
+            else
+            {
+                DialogService.ShowError("Lütfen bir rezervasyon seçin.");
+            }
+        }
+
+        private void ShowReservationDetails(Reservation reservation)
+        {
+            try
+            {
+                // Rezervasyon detaylarını birleştir
+                string details = $"📋 REZERVASYON DETAYLARI\n\n";
+                details += $"👤 Müşteri: {reservation.CustomerName}\n";
+                details += $"📞 Telefon: {reservation.CustomerPhone}\n";
+                details += $"📧 E-posta: {reservation.CustomerEmail}\n";
+                details += $"📅 Tarih: {reservation.ReservationDate:dd.MM.yyyy}\n";
+                details += $"⏰ Saat: {reservation.ReservationTime:hh\\:mm}\n";
+                details += $"👥 Kişi Sayısı: {reservation.GuestCount}\n";
+                details += $"🪑 Masa ID: {reservation.TableId}\n";
+
+                // Menü ürünlerini yükle
+                var menuController = new MenuController();
+                var menuItems = menuController.GetReservationMenuItems(reservation.Id);
+                
+                if (menuItems.Count > 0)
+                {
+                    details += $"\n🍽️ SEÇİLEN MENÜLER:\n";
+                    decimal totalPrice = 0;
+                    
+                    foreach (var item in menuItems)
+                    {
+                        string menuItemName = menuController.GetMenuItemById(item.MenuItemId)?.Name ?? "Bilinmeyen Ürün";
+                        details += $"  • {menuItemName} - Adet: {item.Quantity} - Fiyat: {item.TotalPrice:F2} TL\n";
+                        totalPrice += item.TotalPrice;
+                    }
+                    
+                    details += $"\n💰 Toplam Menü Fiyatı: {totalPrice:F2} TL";
+                }
+                else
+                {
+                    details += $"\n🍽️ Menü seçimi bulunmamaktadır.";
+                }
+
+                // Detayları göster
+                DialogService.ShowInfo(details, "Rezervasyon Detayları");
+                
+                // Ayrıca menü listesini de güncelle
+                LoadReservationMenuItems(reservation.Id);
+            }
+            catch (Exception ex)
+            {
+                DialogService.ShowError($"Rezervasyon detayları yüklenemedi: {ex.Message}");
+            }
         }
     }
 }

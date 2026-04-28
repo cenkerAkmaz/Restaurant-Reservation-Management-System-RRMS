@@ -33,6 +33,7 @@ namespace RestoranRezervasyonSistemi.Views
             this.tabMasaYonetimi = new System.Windows.Forms.TabPage();
             this.tabKullaniciYonetimi = new System.Windows.Forms.TabPage();
             this.tabRezervasyonYonetimi = new System.Windows.Forms.TabPage();
+            this.tabMenuYonetimi = new System.Windows.Forms.TabPage();
             this.dgvMasalar = new System.Windows.Forms.DataGridView();
             this.txtMasaAdi = new System.Windows.Forms.TextBox();
             this.txtKapasite = new System.Windows.Forms.TextBox();
@@ -43,6 +44,8 @@ namespace RestoranRezervasyonSistemi.Views
             this.lblMasaAdi = new System.Windows.Forms.Label();
             this.lblKapasite = new System.Windows.Forms.Label();
             this.lblKonum = new System.Windows.Forms.Label();
+            this.btnMenuYonetimi = new System.Windows.Forms.Button();
+            this.lblMenuManagement = new System.Windows.Forms.Label();
             
             // Kullanıcı Yönetimi Kontrolleri
             this.dgvUsers = new System.Windows.Forms.DataGridView();
@@ -55,7 +58,10 @@ namespace RestoranRezervasyonSistemi.Views
             this.dgvRezervasyonlar = new System.Windows.Forms.DataGridView();
             this.btnCancelReservation = new System.Windows.Forms.Button();
             this.btnRefreshReservations = new System.Windows.Forms.Button();
+            this.btnRezervasyonDetaylari = new System.Windows.Forms.Button();
             this.lblReservationManagement = new System.Windows.Forms.Label();
+            this.lblRezervasyonDetaylari = new System.Windows.Forms.Label();
+            this.lstRezervasyonMenuleri = new System.Windows.Forms.ListBox();
             
             this.lblBaslik = new System.Windows.Forms.Label();
             this.mainTabControl.SuspendLayout();
@@ -75,6 +81,7 @@ namespace RestoranRezervasyonSistemi.Views
             this.mainTabControl.Controls.Add(this.tabMasaYonetimi);
             this.mainTabControl.Controls.Add(this.tabKullaniciYonetimi);
             this.mainTabControl.Controls.Add(this.tabRezervasyonYonetimi);
+            this.mainTabControl.Controls.Add(this.tabMenuYonetimi);
             this.mainTabControl.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.mainTabControl.Location = new System.Drawing.Point(12, 60);
             this.mainTabControl.Name = "mainTabControl";
@@ -122,7 +129,10 @@ namespace RestoranRezervasyonSistemi.Views
             this.tabRezervasyonYonetimi.Controls.Add(this.dgvRezervasyonlar);
             this.tabRezervasyonYonetimi.Controls.Add(this.btnCancelReservation);
             this.tabRezervasyonYonetimi.Controls.Add(this.btnRefreshReservations);
+            this.tabRezervasyonYonetimi.Controls.Add(this.btnRezervasyonDetaylari);
             this.tabRezervasyonYonetimi.Controls.Add(this.lblReservationManagement);
+            this.tabRezervasyonYonetimi.Controls.Add(this.lblRezervasyonDetaylari);
+            this.tabRezervasyonYonetimi.Controls.Add(this.lstRezervasyonMenuleri);
             this.tabRezervasyonYonetimi.Location = new System.Drawing.Point(4, 22);
             this.tabRezervasyonYonetimi.Name = "tabRezervasyonYonetimi";
             this.tabRezervasyonYonetimi.Padding = new System.Windows.Forms.Padding(3);
@@ -130,6 +140,18 @@ namespace RestoranRezervasyonSistemi.Views
             this.tabRezervasyonYonetimi.TabIndex = 2;
             this.tabRezervasyonYonetimi.Text = "📅 Rezervasyon Yönetimi";
             this.tabRezervasyonYonetimi.UseVisualStyleBackColor = true;
+            // 
+            // tabMenuYonetimi
+            // 
+            this.tabMenuYonetimi.Controls.Add(this.btnMenuYonetimi);
+            this.tabMenuYonetimi.Controls.Add(this.lblMenuManagement);
+            this.tabMenuYonetimi.Location = new System.Drawing.Point(4, 22);
+            this.tabMenuYonetimi.Name = "tabMenuYonetimi";
+            this.tabMenuYonetimi.Padding = new System.Windows.Forms.Padding(3);
+            this.tabMenuYonetimi.Size = new System.Drawing.Size(992, 524);
+            this.tabMenuYonetimi.TabIndex = 3;
+            this.tabMenuYonetimi.Text = "🍽 Menü Yönetimi";
+            this.tabMenuYonetimi.UseVisualStyleBackColor = true;
             // 
             // dgvMasalar
             // 
@@ -236,6 +258,30 @@ namespace RestoranRezervasyonSistemi.Views
             this.lblUserManagement.TabIndex = 10;
             this.lblUserManagement.Text = "👥 Kullanıcı İşlemleri";
             
+            // 
+            // lblMenuManagement
+            // 
+            this.lblMenuManagement.AutoSize = true;
+            this.lblMenuManagement.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblMenuManagement.Location = new System.Drawing.Point(20, 50);
+            this.lblMenuManagement.Name = "lblMenuManagement";
+            this.lblMenuManagement.Size = new System.Drawing.Size(200, 23);
+            this.lblMenuManagement.TabIndex = 19;
+            this.lblMenuManagement.Text = "🍽 Menü İşlemleri";
+            // 
+            // btnMenuYonetimi
+            // 
+            this.btnMenuYonetimi.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.btnMenuYonetimi.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnMenuYonetimi.ForeColor = System.Drawing.Color.White;
+            this.btnMenuYonetimi.Location = new System.Drawing.Point(20, 10);
+            this.btnMenuYonetimi.Name = "btnMenuYonetimi";
+            this.btnMenuYonetimi.Size = new System.Drawing.Size(150, 30);
+            this.btnMenuYonetimi.TabIndex = 20;
+            this.btnMenuYonetimi.Text = "Menü Yönetimini Aç";
+            this.btnMenuYonetimi.UseVisualStyleBackColor = false;
+            this.btnMenuYonetimi.Click += new System.EventHandler(this.btnMenuYonetimi_Click);
+            // 
             // dgvUsers
             this.dgvUsers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -336,6 +382,37 @@ namespace RestoranRezervasyonSistemi.Views
             this.btnRefreshReservations.UseVisualStyleBackColor = false;
             this.btnRefreshReservations.Click += new System.EventHandler(this.btnRefreshReservations_Click);
             
+            // btnRezervasyonDetaylari
+            // 
+            this.btnRezervasyonDetaylari.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            this.btnRezervasyonDetaylari.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnRezervasyonDetaylari.ForeColor = System.Drawing.Color.White;
+            this.btnRezervasyonDetaylari.Location = new System.Drawing.Point(430, 440);
+            this.btnRezervasyonDetaylari.Name = "btnRezervasyonDetaylari";
+            this.btnRezervasyonDetaylari.Size = new System.Drawing.Size(280, 45);
+            this.btnRezervasyonDetaylari.TabIndex = 22;
+            this.btnRezervasyonDetaylari.Text = "📋 Rezervasyon Detayları";
+            this.btnRezervasyonDetaylari.UseVisualStyleBackColor = false;
+            this.btnRezervasyonDetaylari.Click += new System.EventHandler(this.btnRezervasyonDetaylari_Click);
+            
+            // lblRezervasyonDetaylari
+            // 
+            this.lblRezervasyonDetaylari.AutoSize = true;
+            this.lblRezervasyonDetaylari.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblRezervasyonDetaylari.ForeColor = System.Drawing.Color.White;
+            this.lblRezervasyonDetaylari.Location = new System.Drawing.Point(20, 440);
+            this.lblRezervasyonDetaylari.Name = "lblRezervasyonDetaylari";
+            this.lblRezervasyonDetaylari.Size = new System.Drawing.Size(200, 23);
+            this.lblRezervasyonDetaylari.TabIndex = 20;
+            this.lblRezervasyonDetaylari.Text = "Seçili Rezervasyon Menüleri:";
+            // 
+            // lstRezervasyonMenuleri
+            // 
+            this.lstRezervasyonMenuleri.FormattingEnabled = true;
+            this.lstRezervasyonMenuleri.Location = new System.Drawing.Point(20, 470);
+            this.lstRezervasyonMenuleri.Name = "lstRezervasyonMenuleri";
+            this.lstRezervasyonMenuleri.Size = new System.Drawing.Size(950, 50);
+            this.lstRezervasyonMenuleri.TabIndex = 21;
             // 
             // lblBaslik
             // 
@@ -367,6 +444,8 @@ namespace RestoranRezervasyonSistemi.Views
             this.tabKullaniciYonetimi.PerformLayout();
             this.tabRezervasyonYonetimi.ResumeLayout(false);
             this.tabRezervasyonYonetimi.PerformLayout();
+            this.tabMenuYonetimi.ResumeLayout(false);
+            this.tabMenuYonetimi.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMasalar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRezervasyonlar)).EndInit();
@@ -403,8 +482,16 @@ namespace RestoranRezervasyonSistemi.Views
         private System.Windows.Forms.DataGridView dgvRezervasyonlar;
         private System.Windows.Forms.Button btnCancelReservation;
         private System.Windows.Forms.Button btnRefreshReservations;
+        private System.Windows.Forms.Button btnRezervasyonDetaylari;
         private System.Windows.Forms.Label lblReservationManagement;
+        private System.Windows.Forms.Label lblRezervasyonDetaylari;
+        private System.Windows.Forms.ListBox lstRezervasyonMenuleri;
         
         private System.Windows.Forms.Label lblBaslik;
+        
+        // Menü Yönetimi Kontrolleri
+        private System.Windows.Forms.TabPage tabMenuYonetimi;
+        private System.Windows.Forms.Button btnMenuYonetimi;
+        private System.Windows.Forms.Label lblMenuManagement;
     }
 }

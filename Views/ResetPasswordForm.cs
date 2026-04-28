@@ -1,16 +1,10 @@
-﻿using System.Data.SqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 using RestoranRezervasyonSistemi.Controllers;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class ResetPasswordForm : Form
     {

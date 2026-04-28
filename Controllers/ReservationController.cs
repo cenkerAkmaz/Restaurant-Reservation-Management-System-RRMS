@@ -34,7 +34,7 @@ namespace RestoranRezervasyonSistemi.Controllers
             return _reservations.GetAllReservations();
         }
 
-        public void CreateReservation(int tableId, string customerName, string customerPhone, DateTime date, TimeSpan time, int guestCount, string customerEmail)
+        public int CreateReservation(int tableId, string customerName, string customerPhone, DateTime date, TimeSpan time, int guestCount, string customerEmail)
         {
             var r = new Reservation
             {
@@ -47,7 +47,7 @@ namespace RestoranRezervasyonSistemi.Controllers
                 CustomerEmail = customerEmail
             };
 
-            _reservations.InsertReservation(r);
+            return _reservations.InsertReservation(r);
         }
 
         public (int ReservationId, TimeSpan ReservationTime)? GetNextReservationForUser(int tableId, DateTime date, string customerEmail, string customerName) =>

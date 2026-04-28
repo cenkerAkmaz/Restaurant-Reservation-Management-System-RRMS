@@ -6,7 +6,7 @@ using RestoranRezervasyonSistemi.Models;
 using RestoranRezervasyonSistemi.Data;
 using RestoranRezervasyonSistemi.Services;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class MainForm : Form
     {
@@ -62,17 +62,28 @@ namespace RestoranRezervasyonSistemi
 
         public void LoadTables()
         {
-            flpMasalar.Controls.Clear();
-
-            var tableButtonInfos = _tableService.GetTableButtonInfos();
-
-            foreach (var tableInfo in tableButtonInfos)
+            try
             {
-                var button = CreateTableButton(tableInfo);
-                flpMasalar.Controls.Add(button);
-            }
+                flpMasalar.Controls.Clear();
 
-            flpMasalar.Refresh();
+                var tableButtonInfos = _tableService.GetTableButtonInfos();
+
+                foreach (var tableInfo in tableButtonInfos)
+                {
+                    var button = CreateTableButton(tableInfo);
+                    flpMasalar.Controls.Add(button);
+                }
+
+                flpMasalar.Refresh();
+            }
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show($"Null reference hatası (masa yüklenirken): {ex.Message}\n\nVeritabanı bağlantısını kontrol edin.", "Null Reference Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Masalar yüklenirken hata oluştu: {ex.Message}\n\nStack Trace: {ex.StackTrace}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private Button CreateTableButton(TableButtonInfo tableInfo)
@@ -103,18 +114,42 @@ namespace RestoranRezervasyonSistemi
 
         private void HandleTableClick(Table table)
         {
-            using (var rezervasyonDetay = new RezervasyonDetay())
+            try
             {
-                rezervasyonDetay.SecilenMasaAd = table.TableName;
-                rezervasyonDetay.SecilenMasaId = table.Id;
-                rezervasyonDetay.GirisYapanAdminMail = this.AktifKullaniciMail;
-                rezervasyonDetay.AktifKullanici = this.CurrentUser;
-                rezervasyonDetay.SecilenMasaKapasite = table.Capacity;
+                // Null kontrolleri
+                if (table == null)
+                {
+                    MessageBox.Show("Masa bilgisi bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                rezervasyonDetay.ShowDialog();
+                if (string.IsNullOrEmpty(this.AktifKullaniciMail))
+                {
+                    MessageBox.Show("Kullanıcı mail adresi bulunamadı. Lütfen tekrar giriş yapın.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (var rezervasyonDetay = new RezervasyonDetay())
+                {
+                    rezervasyonDetay.SecilenMasaAd = table.TableName ?? "Bilinmeyen Masa";
+                    rezervasyonDetay.SecilenMasaId = table.Id;
+                    rezervasyonDetay.GirisYapanAdminMail = this.AktifKullaniciMail;
+                    rezervasyonDetay.AktifKullanici = this.CurrentUser;
+                    rezervasyonDetay.SecilenMasaKapasite = table.Capacity;
+
+                    rezervasyonDetay.ShowDialog();
+                }
+
+                LoadTables();
             }
-
-            LoadTables();
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show($"Null reference hatası: {ex.Message}\n\nLütfen tüm alanların dolu olduğundan emin olun.", "Null Reference Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Masa tıklanırken hata oluştu: {ex.Message}\n\nStack Trace: {ex.StackTrace}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)

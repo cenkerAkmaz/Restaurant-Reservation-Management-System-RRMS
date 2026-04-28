@@ -1,6 +1,6 @@
-﻿using RestoranRezervasyonSistemi.Views;
-using System;
+﻿using System;
 using System.Windows.Forms;
+using RestoranRezervasyonSistemi.Views;
 
 namespace RestoranRezervasyonSistemi
 {

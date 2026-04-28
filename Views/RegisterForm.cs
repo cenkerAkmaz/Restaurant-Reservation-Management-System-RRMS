@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using RestoranRezervasyonSistemi.Controllers;
 
-namespace RestoranRezervasyonSistemi
+namespace RestoranRezervasyonSistemi.Views
 {
     public partial class RegisterForm : Form
     {
@@ -25,8 +25,7 @@ namespace RestoranRezervasyonSistemi
 
                 MessageBox.Show("Onay kodu mail adresinize gönderildi!");
 
-                // 3. Onay Formuna (VerificationForm) yönlendir
-                VerificationForm vf = new VerificationForm
+                var vf = new VerificationForm
                 {
                     GelenMail = email,
                     GelenKullaniciAdi = username,
