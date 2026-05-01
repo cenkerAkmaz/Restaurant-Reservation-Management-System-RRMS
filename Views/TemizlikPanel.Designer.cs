@@ -26,6 +26,21 @@ namespace RestoranRezervasyonSistemi.Views
             ((System.ComponentModel.ISupportInitialize)(this.dgvMasalar)).BeginInit();
             this.SuspendLayout();
             // 
+            // dgvMasalar
+            // 
+            this.dgvMasalar.AllowUserToAddRows = false;
+            this.dgvMasalar.AllowUserToDeleteRows = false;
+            this.dgvMasalar.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvMasalar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMasalar.Location = new System.Drawing.Point(50, 140);
+            this.dgvMasalar.Name = "dgvMasalar";
+            this.dgvMasalar.ReadOnly = true;
+            this.dgvMasalar.RowHeadersVisible = false;
+            this.dgvMasalar.RowHeadersWidth = 51;
+            this.dgvMasalar.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvMasalar.Size = new System.Drawing.Size(700, 300);
+            this.dgvMasalar.TabIndex = 3;
+            // 
             // lblUser
             // 
             this.lblUser.AutoSize = true;
@@ -33,9 +48,22 @@ namespace RestoranRezervasyonSistemi.Views
             this.lblUser.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
             this.lblUser.Location = new System.Drawing.Point(20, 20);
             this.lblUser.Name = "lblUser";
-            this.lblUser.Size = new System.Drawing.Size(200, 24);
+            this.lblUser.Size = new System.Drawing.Size(160, 25);
             this.lblUser.TabIndex = 0;
             this.lblUser.Text = "👤 Kullanıcı Adı";
+            // 
+            // btnMasaTemizle
+            // 
+            this.btnMasaTemizle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.btnMasaTemizle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnMasaTemizle.ForeColor = System.Drawing.Color.White;
+            this.btnMasaTemizle.Location = new System.Drawing.Point(250, 470);
+            this.btnMasaTemizle.Name = "btnMasaTemizle";
+            this.btnMasaTemizle.Size = new System.Drawing.Size(180, 68);
+            this.btnMasaTemizle.TabIndex = 4;
+            this.btnMasaTemizle.Text = "✨ Masa Temizle";
+            this.btnMasaTemizle.UseVisualStyleBackColor = false;
+            this.btnMasaTemizle.Click += new System.EventHandler(this.btnMasaTemizle_Click);
             // 
             // btnCikis
             // 
@@ -50,44 +78,6 @@ namespace RestoranRezervasyonSistemi.Views
             this.btnCikis.UseVisualStyleBackColor = false;
             this.btnCikis.Click += new System.EventHandler(this.btnCikis_Click);
             // 
-            // lblBaslik
-            // 
-            this.lblBaslik.AutoSize = true;
-            this.lblBaslik.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.lblBaslik.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
-            this.lblBaslik.Location = new System.Drawing.Point(300, 80);
-            this.lblBaslik.Name = "lblBaslik";
-            this.lblBaslik.Size = new System.Drawing.Size(200, 31);
-            this.lblBaslik.TabIndex = 2;
-            this.lblBaslik.Text = "🧹 Temizlik Paneli";
-            // 
-            // dgvMasalar
-            // 
-            this.dgvMasalar.AllowUserToAddRows = false;
-            this.dgvMasalar.AllowUserToDeleteRows = false;
-            this.dgvMasalar.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMasalar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvMasalar.Location = new System.Drawing.Point(50, 140);
-            this.dgvMasalar.Name = "dgvMasalar";
-            this.dgvMasalar.ReadOnly = true;
-            this.dgvMasalar.RowHeadersVisible = false;
-            this.dgvMasalar.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMasalar.Size = new System.Drawing.Size(700, 300);
-            this.dgvMasalar.TabIndex = 3;
-            // 
-            // btnMasaTemizle
-            // 
-            this.btnMasaTemizle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
-            this.btnMasaTemizle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.btnMasaTemizle.ForeColor = System.Drawing.Color.White;
-            this.btnMasaTemizle.Location = new System.Drawing.Point(250, 470);
-            this.btnMasaTemizle.Name = "btnMasaTemizle";
-            this.btnMasaTemizle.Size = new System.Drawing.Size(180, 50);
-            this.btnMasaTemizle.TabIndex = 4;
-            this.btnMasaTemizle.Text = "✨ Masa Temizle";
-            this.btnMasaTemizle.UseVisualStyleBackColor = false;
-            this.btnMasaTemizle.Click += new System.EventHandler(this.btnMasaTemizle_Click);
-            // 
             // btnYenile
             // 
             this.btnYenile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
@@ -101,12 +91,23 @@ namespace RestoranRezervasyonSistemi.Views
             this.btnYenile.UseVisualStyleBackColor = false;
             this.btnYenile.Click += new System.EventHandler(this.btnYenile_Click);
             // 
+            // lblBaslik
+            // 
+            this.lblBaslik.AutoSize = true;
+            this.lblBaslik.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.lblBaslik.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.lblBaslik.Location = new System.Drawing.Point(300, 80);
+            this.lblBaslik.Name = "lblBaslik";
+            this.lblBaslik.Size = new System.Drawing.Size(252, 31);
+            this.lblBaslik.TabIndex = 2;
+            this.lblBaslik.Text = "🧹 Temizlik Paneli";
+            // 
             // TemizlikPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(800, 550);
+            this.ClientSize = new System.Drawing.Size(798, 550);
             this.Controls.Add(this.btnYenile);
             this.Controls.Add(this.btnMasaTemizle);
             this.Controls.Add(this.dgvMasalar);

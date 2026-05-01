@@ -22,12 +22,12 @@ namespace RestoranRezervasyonSistemi.Views
         public int SecilenMasaKapasite { get; set; }
         string dogrulamaKodu;
 
-        // 6. hafta kodları eklendi
+        
         private readonly ReservationController _reservationController = new ReservationController();
         private readonly SmtpEmailService _emailService = new SmtpEmailService();
         private int? _currentUserReservationId;
 
-        // 9. hafta kodları eklendi - Menü ve yemek seçimi
+        
         private readonly MenuController _menuController = new MenuController();
         private readonly ReservationWorkflowService _reservationWorkflowService;
         private Dictionary<int, RestoranRezervasyonSistemi.Models.MenuItem> _menuItemsCache;

@@ -43,13 +43,14 @@
             this.dtpSaat = new System.Windows.Forms.DateTimePicker();
             this.grpYemekSecimi = new System.Windows.Forms.GroupBox();
             this.lstYemekSecimi = new System.Windows.Forms.ListView();
-            this.colYemekAdi = new System.Windows.Forms.ColumnHeader();
-            this.colFiyat = new System.Windows.Forms.ColumnHeader();
-            this.colAdet = new System.Windows.Forms.ColumnHeader();
+            this.colYemekAdi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colFiyat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colAdet = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lblToplamFiyat = new System.Windows.Forms.Label();
             this.picYemekResmi = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.nmrKisiSayisi)).BeginInit();
             this.grpYemekSecimi.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picYemekResmi)).BeginInit();
             this.SuspendLayout();
             // 
             // lblBilgi
@@ -196,7 +197,7 @@
             this.grpYemekSecimi.ForeColor = System.Drawing.Color.White;
             this.grpYemekSecimi.Location = new System.Drawing.Point(350, 30);
             this.grpYemekSecimi.Name = "grpYemekSecimi";
-            this.grpYemekSecimi.Size = new System.Drawing.Size(280, 450);
+            this.grpYemekSecimi.Size = new System.Drawing.Size(319, 449);
             this.grpYemekSecimi.TabIndex = 12;
             this.grpYemekSecimi.TabStop = false;
             this.grpYemekSecimi.Text = "Yemek Seçimi (Opsiyonel)";
@@ -206,10 +207,11 @@
             this.lstYemekSecimi.CheckBoxes = true;
             this.lstYemekSecimi.FullRowSelect = true;
             this.lstYemekSecimi.GridLines = true;
-            this.lstYemekSecimi.Location = new System.Drawing.Point(10, 20);
+            this.lstYemekSecimi.HideSelection = false;
+            this.lstYemekSecimi.Location = new System.Drawing.Point(6, 21);
             this.lstYemekSecimi.MultiSelect = false;
             this.lstYemekSecimi.Name = "lstYemekSecimi";
-            this.lstYemekSecimi.Size = new System.Drawing.Size(250, 400);
+            this.lstYemekSecimi.Size = new System.Drawing.Size(294, 407);
             this.lstYemekSecimi.TabIndex = 0;
             this.lstYemekSecimi.UseCompatibleStateImageBehavior = false;
             this.lstYemekSecimi.View = System.Windows.Forms.View.Details;
@@ -225,7 +227,6 @@
             // colFiyat
             // 
             this.colFiyat.Text = "Fiyat";
-            this.colFiyat.Width = 60;
             // 
             // colAdet
             // 
@@ -236,16 +237,16 @@
             // 
             this.lblToplamFiyat.AutoSize = true;
             this.lblToplamFiyat.ForeColor = System.Drawing.Color.White;
-            this.lblToplamFiyat.Location = new System.Drawing.Point(350, 490);
+            this.lblToplamFiyat.Location = new System.Drawing.Point(347, 497);
             this.lblToplamFiyat.Name = "lblToplamFiyat";
-            this.lblToplamFiyat.Size = new System.Drawing.Size(85, 16);
+            this.lblToplamFiyat.Size = new System.Drawing.Size(89, 16);
             this.lblToplamFiyat.TabIndex = 13;
             this.lblToplamFiyat.Text = "Toplam Fiyat:";
             // 
             // picYemekResmi
             // 
             this.picYemekResmi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picYemekResmi.Location = new System.Drawing.Point(650, 30);
+            this.picYemekResmi.Location = new System.Drawing.Point(688, 30);
             this.picYemekResmi.Name = "picYemekResmi";
             this.picYemekResmi.Size = new System.Drawing.Size(200, 150);
             this.picYemekResmi.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -280,6 +281,7 @@
             this.Load += new System.EventHandler(this.RezervasyonDetay_Load);
             ((System.ComponentModel.ISupportInitialize)(this.nmrKisiSayisi)).EndInit();
             this.grpYemekSecimi.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picYemekResmi)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
